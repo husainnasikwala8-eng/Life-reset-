@@ -18,14 +18,15 @@
   }
   
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-  body { background: var(--bg-void); color: var(--text-primary); font-family: var(--font-body); overflow-x: hidden; padding-bottom: 95px; }
+  body { background: var(--bg-void); color: var(--text-primary); font-family: var(--font-body); overflow-x: hidden; padding-bottom: 110px; }
   [hidden] { display: none !important; }
 
+  /* LOCK SCREEN */
   #lock-screen { position: fixed; inset: 0; z-index: 500; background: var(--bg-void); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
   .vault-title { font-family: var(--font-display); font-size: 36px; font-weight: 700; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; background: linear-gradient(90deg, #fff, #7C838F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .vault-sub { font-size: 14px; color: var(--text-dim); margin-bottom: 40px; }
   
-  .btn-primary { background: var(--accent-orange); color: #fff; border: none; padding: 14px 24px; border-radius: 12px; font-family: var(--font-body); font-weight: 600; font-size: 15px; cursor: pointer; box-shadow: 0 8px 24px rgba(255, 94, 0, 0.2); width: 100%; max-width: 300px; transition: transform 0.2s; }
+  .btn-primary { background: var(--accent-orange); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-family: var(--font-body); font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 8px 24px rgba(255, 94, 0, 0.3); width: 100%; transition: transform 0.1s; letter-spacing: 1px; }
   .btn-primary:active { transform: scale(0.96); }
   .btn-secondary { background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 14px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; }
 
@@ -34,31 +35,34 @@
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-  .day-tracker { font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+  .day-tracker { font-family: var(--font-display); font-size: 30px; font-weight: 700; }
   .day-sub { color: var(--text-dim); font-size: 13px; font-weight: 500; }
 
-  /* Audio Toggle Button */
-  .audio-toggle { background: var(--bg-glass); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; backdrop-filter: blur(5px); }
+  /* AMBIENT AUDIO TOGGLE */
+  .audio-toggle { background: var(--bg-glass); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; backdrop-filter: blur(5px); }
   .audio-toggle.playing { border-color: var(--accent-orange); color: var(--accent-orange); }
 
   #status-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--accent-orange); color: #fff; padding: 12px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 1000; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-  .stat-card { background: var(--bg-glass); backdrop-filter: blur(12px); border-radius: 16px; padding: 16px; border: 1px solid rgba(255,255,255,0.05); }
-  .stat-card.overall { background: linear-gradient(135deg, var(--accent-orange), #D64D00); border: none; box-shadow: 0 8px 20px rgba(255, 94, 0, 0.2); }
-  .stat-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; opacity: 0.8; }
-  .stat-val { font-size: 26px; font-weight: 700; font-family: var(--font-display); color: #fff; }
+  /* CINEMATIC HABIT CARDS (Restored) */
+  .section-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 16px; margin-top: 24px; }
+  .habit-card { position: relative; height: 135px; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 16px; margin-bottom: 16px; box-shadow: inset 0 -60px 50px -10px rgba(0,0,0,0.85); cursor: pointer; transition: transform 0.1s; border: 1px solid rgba(255,255,255,0.1); }
+  .habit-card:active { transform: scale(0.97); }
+  .habit-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: -1; opacity: 0.55; transition: filter 0.3s; }
+  .habit-header { display: flex; align-items: center; gap: 14px; }
+  .habit-icon { width: 42px; height: 42px; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid rgba(255,255,255,0.2); }
+  .habit-name { font-weight: 700; font-size: 17px; text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+  .habit-sub { font-size: 12px; color: rgba(255,255,255,0.8); text-transform: uppercase; font-weight: 600; margin-top: 4px; letter-spacing: 0.5px; }
+  .habit-meta { display: flex; gap: 16px; font-size: 12px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
+  .meta-item { display: flex; align-items: center; gap: 4px; }
 
-  .section-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 16px; margin-top: 10px; }
-  .task-input-box { display: flex; gap: 8px; margin-bottom: 20px; }
-  .task-input { flex: 1; background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: #fff; outline: none; }
-  
-  .task-card { background: var(--bg-panel); border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.03); transition: opacity 0.3s; }
-  .task-badge { font-size: 10px; padding: 4px 8px; border-radius: 6px; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; display: inline-block; }
-  .badge-day { background: rgba(255, 194, 75, 0.15); color: #FFC24B; }
-  .badge-night { background: rgba(93, 169, 255, 0.15); color: #5DA9FF; }
+  /* TOUCH-OPTIMIZED PROTOCOL BUILDER */
+  .task-builder { background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 16px; margin-bottom: 24px; }
+  .task-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 16px; border-radius: 12px; color: #fff; outline: none; font-size: 15px; font-family: var(--font-body); margin-bottom: 12px; }
+  .task-input:focus { border-color: var(--accent-orange); }
 
-  .day-sheet-card { background: var(--bg-panel); border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  /* DATE SHEETS & MODALS */
+  .day-sheet-card { background: var(--bg-panel); border-radius: 16px; padding: 18px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
   .day-sheet-info { display: flex; flex-direction: column; gap: 4px; }
   .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
   .status-empty { background: #444; }
@@ -66,21 +70,19 @@
 
   #entry-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 400; display: flex; flex-direction: column; justify-content: flex-end; }
   .modal-content { background: var(--bg-panel); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 24px; height: 85vh; display: flex; flex-direction: column; border-top: 1px solid rgba(255,255,255,0.1); }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
   
   .diary-textarea { flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; color: #fff; font-family: var(--font-body); font-size: 15px; resize: none; outline: none; margin-bottom: 20px; line-height: 1.5; }
-  
   .media-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
   .btn-record { background: #FF3B30; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; }
-  .video-preview-badge { text-align: center; font-size: 12px; color: #00E676; margin-bottom: 10px; font-weight: 600; }
 
-  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: rgba(19, 21, 25, 0.9); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-around; align-items: center; z-index: 200; padding-bottom: 10px; }
-  .nav-item { background: none; border: none; color: var(--text-dim); font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
+  /* BOTTOM NAVIGATION & VOICE */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(19, 21, 25, 0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-around; align-items: center; z-index: 200; padding-bottom: env(safe-area-inset-bottom); }
+  .nav-item { background: none; border: none; color: var(--text-dim); font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
   .nav-item.active { color: var(--accent-orange); }
-  .nav-icon { font-size: 22px; }
+  .nav-icon { font-size: 24px; }
 
-  .voice-float { position: fixed; bottom: 100px; right: 20px; background: var(--accent-orange); color: #fff; width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(255,94,0,0.4); z-index: 250; cursor: pointer; }
-  .voice-float.recording { animation: pulse 1s infinite; background: #FF3B30; box-shadow: 0 10px 25px rgba(255,59,48,0.4); }
+  .voice-float { position: fixed; bottom: 105px; right: 20px; background: var(--accent-orange); color: #fff; width: 64px; height: 64px; border-radius: 50%; border: none; font-size: 26px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(255,94,0,0.5); z-index: 250; cursor: pointer; }
+  .voice-float.recording { animation: pulse 1s infinite; background: #FF3B30; box-shadow: 0 10px 25px rgba(255,59,48,0.5); }
   @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
   
   #video-overlay { position: fixed; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -100,9 +102,10 @@
 
   <!-- SCREEN 1: DASHBOARD -->
   <div id="screen-dashboard" class="screen active">
-    <!-- Cinematic Header with Background Video and Audio Toggle -->
-    <div style="position: relative; width: 100%; border-radius: 16px; overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1);">
-      <video src="onelife.mp4" autoplay loop muted playsinline style="width: 100%; height: 120px; object-fit: cover; filter: contrast(1.2); pointer-events: none;"></video>
+    
+    <!-- Cinematic Header -->
+    <div style="position: relative; width: 100%; border-radius: 20px; overflow: hidden; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <video src="onelife.mp4" autoplay loop muted playsinline style="width: 100%; height: 130px; object-fit: cover; filter: contrast(1.2); pointer-events: none;"></video>
       <div style="position: absolute; bottom: 12px; right: 12px;">
         <button id="audio-toggle-btn" class="audio-toggle" onclick="toggleAmbientAudio()">🔇 Ambient: OFF</button>
       </div>
@@ -111,29 +114,25 @@
     <div class="header">
       <div>
         <div class="day-tracker" id="current-day-label">Day 1 / 60+</div>
-        <div class="day-sub" id="user-greeting">System Active. Protocol Live.</div>
+        <div class="day-sub" id="user-greeting">System Active, Husain. Protocol Live.</div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 24px; font-weight: 700; color: var(--accent-orange); font-family: var(--font-display);" id="xp-val">0 XP</div>
+        <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700;" id="rank-val">Novice Rank</div>
       </div>
     </div>
 
-    <div class="stats-grid">
-      <div class="stat-card overall">
-        <div class="stat-title" style="color: #fff;">✦ Total XP</div>
-        <div class="stat-val" id="xp-val">0</div>
+    <!-- TOUCH-OPTIMIZED PROTOCOL BUILDER -->
+    <div class="section-title">Architect New Protocol</div>
+    <div class="task-builder">
+      <input type="text" id="custom-task-text" class="task-input" placeholder="e.g. 2 Hours Deep Work, No Sugar...">
+      <div style="display: flex; gap: 12px;">
+        <select id="custom-task-type" class="task-input" style="margin-bottom: 0; flex: 1;">
+          <option value="☀️ Day">☀️ Day Phase</option>
+          <option value="🌙 Night">🌙 Night Phase</option>
+        </select>
+        <button class="btn-primary" id="btn-add-task" style="flex: 1;">+ INITIALIZE</button>
       </div>
-      <div class="stat-card">
-        <div class="stat-title">🛡️ Rank</div>
-        <div class="stat-val" id="rank-val" style="font-size: 20px; margin-top: 6px;">Novice</div>
-      </div>
-    </div>
-
-    <div class="section-title">Architect Protocol</div>
-    <div class="task-input-box">
-      <input type="text" id="custom-task-text" class="task-input" placeholder="Enter protocol logic...">
-      <select id="custom-task-type" class="task-input" style="flex: 0.4;">
-        <option value="Day">Day</option>
-        <option value="Night">Night</option>
-      </select>
-      <button class="btn-primary" style="width: auto; border-radius: 12px;" onclick="addCustomTask()">+</button>
     </div>
 
     <div class="section-title">Active Sequence</div>
@@ -146,7 +145,7 @@
       <div class="day-tracker">Chronicle Sheets</div>
       <div class="day-sub">Encrypted Video & Text Journals</div>
     </div>
-    <div style="font-size: 13px; color: var(--text-dim); margin-bottom: 16px; line-height: 1.5;">
+    <div style="font-size: 14px; color: var(--text-dim); margin-bottom: 20px; line-height: 1.5;">
       Tap a Date Sheet below to write your daily reflections and lock in your video evidence.
     </div>
     <div id="chronological-days-container"></div>
@@ -158,9 +157,9 @@
       <div class="day-tracker">System Core</div>
       <div class="day-sub">Database Diagnostics</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-title">Network Architecture</div>
-      <div style="font-size: 13px; color: var(--text-dim); margin-top: 8px; line-height: 1.5;">
+    <div class="task-builder">
+      <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px;">Network Architecture</div>
+      <div style="font-size: 13px; color: var(--text-dim); line-height: 1.6;">
         • Drive Scope: AppDataFolder (Hidden Vault)<br>
         • Privacy Status: Invisible to Main Google Drive<br>
         • Firestore: Rules Unlocked (Test Mode)<br>
@@ -168,25 +167,25 @@
     </div>
   </div>
 
-  <!-- DIARY & VIDEO ENTRY MODAL -->
+  <!-- DIARY MODAL -->
   <div id="entry-modal" hidden>
     <div class="modal-content">
-      <div class="modal-header">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div class="day-tracker" id="modal-day-title">Day X</div>
-        <button style="background:none; border:none; color:#fff; font-size:24px; font-weight:bold; cursor:pointer;" onclick="closeEntryModal()">×</button>
+        <button style="background:none; border:none; color:#fff; font-size:32px; font-weight:300; cursor:pointer; padding: 0 10px;" onclick="closeEntryModal()">×</button>
       </div>
       
       <div style="font-size: 12px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Captain's Log (Text Diary)</div>
       <textarea id="diary-text" class="diary-textarea" placeholder="Record your mindset, cravings, and reflections for today..."></textarea>
       
-      <div id="video-status-text" class="video-preview-badge" hidden>✓ Video Locked In Memory</div>
+      <div id="video-status-text" style="text-align: center; font-size: 13px; color: #00E676; margin-bottom: 12px; font-weight: 700;" hidden>✓ Video Locked In Memory. Ready to save.</div>
 
       <div class="media-controls">
         <button class="btn-record" onclick="document.getElementById('camera-upload').click()">📷 Record Video</button>
         <button class="btn-secondary" onclick="document.getElementById('gallery-upload').click()">📁 Upload File</button>
       </div>
       
-      <button class="btn-primary" style="max-width: 100%;" onclick="saveDayEntry()">Encrypt & Save Entry</button>
+      <button class="btn-primary" style="max-width: 100%; padding: 18px;" onclick="saveDayEntry()">Encrypt & Save Entry</button>
     </div>
   </div>
 
@@ -212,11 +211,10 @@
     <video id="player" controls playsinline></video>
   </div>
   
-  <!-- Ambient Audio Track -->
   <audio id="ambient-audio" src="onelife.mp4" loop preload="auto"></audio>
 
   <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -242,6 +240,15 @@
     let pendingVideoFile = null; 
     let isAmbientPlaying = false;
 
+    // Premium Backgrounds & Icons for dynamically created habits
+    const cinematicBgs = [
+      'https://images.unsplash.com/photo-1470071131384-001b85755b36?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80'
+    ];
+    const cinematicIcons = ['⚡', '🎯', '🔥', '⚔️', '🧠'];
+
     const toast = document.getElementById('status-toast');
     function showToast(text, duration = 3500) {
       toast.innerText = text;
@@ -249,25 +256,23 @@
       setTimeout(() => { toast.style.display = 'none'; }, duration);
     }
 
-    // --- AMBIENT AUDIO LOGIC ---
+    // --- GLOBAL BINDINGS ---
+    // These functions must be on 'window' so the dynamically generated HTML strings can click them.
     window.toggleAmbientAudio = function() {
       const audio = document.getElementById('ambient-audio');
       const btn = document.getElementById('audio-toggle-btn');
-      
       if (isAmbientPlaying) {
         audio.pause();
         btn.innerText = "🔇 Ambient: OFF";
         btn.classList.remove('playing');
         isAmbientPlaying = false;
       } else {
-        audio.volume = 0.5; // Background volume
+        audio.volume = 0.5;
         audio.play().then(() => {
           btn.innerText = "🔊 Ambient: ON";
           btn.classList.add('playing');
           isAmbientPlaying = true;
-        }).catch(err => {
-          showToast("Audio locked by browser. Tap screen first.");
-        });
+        }).catch(err => showToast("Audio locked. Tap screen first."));
       }
     };
 
@@ -278,12 +283,32 @@
       btn.classList.add('active');
     };
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('lock-screen').hidden = true;
-        await loadUserData();
+    // --- SECURE EVENT LISTENERS ---
+    // Using proper event listeners bypasses mobile browser inline 'onclick' blocking
+    document.getElementById('btn-add-task').addEventListener('click', async () => {
+      const textInput = document.getElementById('custom-task-text');
+      const typeInput = document.getElementById('custom-task-type');
+      if(!textInput.value.trim()) {
+        showToast("Please enter protocol logic first.");
+        return;
       }
+      
+      const randomBg = cinematicBgs[Math.floor(Math.random() * cinematicBgs.length)];
+      const randomIcon = cinematicIcons[Math.floor(Math.random() * cinematicIcons.length)];
+
+      userTasks.push({ 
+        id: Date.now(), 
+        text: textInput.value.trim(), 
+        type: typeInput.value, 
+        done: false,
+        bg: randomBg,
+        icon: randomIcon
+      });
+      
+      textInput.value = '';
+      updateDashboardUI();
+      showToast("Protocol Initialized.");
+      saveToCloud();
     });
 
     document.getElementById('btn-login').addEventListener('click', async () => {
@@ -296,7 +321,15 @@
         document.getElementById('lock-screen').hidden = true;
         await loadUserData();
       } catch (error) {
-        alert("Uplink Failed. Check connection.");
+        showToast("Uplink Failed. Check connection.");
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('lock-screen').hidden = true;
+        await loadUserData();
       }
     });
 
@@ -323,40 +356,44 @@
 
     function defaultTasks() {
       return [
-        { id: 1, text: "Wake up at 5 AM", type: "Day", done: false },
-        { id: 2, text: "Journal mind state in Date Sheets", type: "Night", done: false }
+        { id: 1, text: "Wake up at 5 AM", type: "☀️ Day", done: false, bg: cinematicBgs[0], icon: "🌅" },
+        { id: 2, text: "Journal mind state in Date Sheets", type: "🌙 Night", done: false, bg: cinematicBgs[1], icon: "📝" }
       ];
     }
 
     function updateDashboardUI() {
-      document.getElementById('xp-val').innerText = totalXP;
-      const rank = totalXP > 1000 ? "Architect" : totalXP > 500 ? "Disciplined" : "Novice";
+      document.getElementById('xp-val').innerText = `${totalXP} XP`;
+      const rank = totalXP > 1000 ? "Architect" : totalXP > 500 ? "Disciplined" : "Novice Rank";
       document.getElementById('rank-val').innerText = rank;
 
       const container = document.getElementById('tasks-container');
       container.innerHTML = '';
+      
+      // Injecting the exact cinematic layout from the screenshots
       userTasks.forEach(task => {
+        const bgImg = task.bg || cinematicBgs[0];
+        const taskIcon = task.icon || '⚡';
+        
         container.innerHTML += `
-          <div class="task-card" style="opacity: ${task.done ? 0.4 : 1};">
-            <div>
-              <span class="task-badge ${task.type === 'Day' ? 'badge-day' : 'badge-night'}">${task.type}</span>
-              <div style="font-weight: 500; font-size: 15px; text-decoration: ${task.done ? 'line-through' : 'none'};">${task.text}</div>
+          <div class="habit-card" onclick="window.toggleTask(${task.id})" style="transform: ${task.done ? 'scale(0.98)' : 'scale(1)'}; border-color: ${task.done ? 'var(--accent-orange)' : 'rgba(255,255,255,0.1)'};">
+            <div class="habit-bg" style="background-image: url('${bgImg}'); filter: ${task.done ? 'grayscale(100%) brightness(0.4)' : 'brightness(0.7)'};"></div>
+            
+            <div class="habit-header">
+              <div class="habit-icon">${taskIcon}</div>
+              <div>
+                <div class="habit-name" style="text-decoration: ${task.done ? 'line-through' : 'none'}; color: ${task.done ? 'var(--text-dim)' : '#fff'};">${task.text}</div>
+                <div class="habit-sub" style="color: ${task.done ? 'var(--accent-orange)' : 'rgba(255,255,255,0.8)'}">${task.type} Protocol • ${task.done ? 'EXECUTED' : 'TAP TO COMPLETE'}</div>
+              </div>
             </div>
-            <button class="btn-primary" style="width: auto; padding: 8px 16px; border-radius: 10px;" onclick="toggleTask(${task.id})">${task.done ? '✓' : '+30'}</button>
+            
+            <div class="habit-meta">
+              <div class="meta-item">🔥 +30 XP</div>
+              <div class="meta-item" style="color: #FFC24B;">⭐ ⭐ ⭐</div>
+            </div>
           </div>
         `;
       });
     }
-
-    window.addCustomTask = async function() {
-      const textInput = document.getElementById('custom-task-text');
-      const typeInput = document.getElementById('custom-task-type');
-      if(!textInput.value.trim()) return;
-      userTasks.push({ id: Date.now(), text: textInput.value.trim(), type: typeInput.value, done: false });
-      textInput.value = '';
-      updateDashboardUI();
-      saveToCloud();
-    };
 
     window.toggleTask = async function(id) {
       const task = userTasks.find(t => t.id === id);
@@ -384,14 +421,14 @@
         container.innerHTML += `
           <div class="day-sheet-card" onclick="openEntryModal(${i})">
             <div class="day-sheet-info">
-              <div style="font-family: var(--font-display); font-weight: 700; font-size: 18px; color: #fff;">
+              <div style="font-family: var(--font-display); font-weight: 700; font-size: 20px; color: #fff;">
                 <span class="status-dot ${isFilled ? 'status-filled' : 'status-empty'}"></span> Day ${i}
               </div>
-              <div style="font-size: 12px; color: var(--text-dim);">
+              <div style="font-size: 13px; color: var(--text-dim); margin-top: 4px;">
                 ${entry.text ? '📝 Journaled' : ''} ${entry.videoId ? ' 📹 Video Locked' : (isFilled ? '' : 'Tap to write log...')}
               </div>
             </div>
-            ${entry.videoId ? `<button class="btn-secondary" style="width:auto; padding: 6px 12px;" onclick="event.stopPropagation(); streamVideo('${entry.videoId}')">Play</button>` : `<span style="color:var(--text-dim)">+</span>`}
+            ${entry.videoId ? `<button class="btn-primary" style="width:auto; padding: 10px 16px; font-size: 13px;" onclick="event.stopPropagation(); streamVideo('${entry.videoId}')">Play Media</button>` : `<span style="color:var(--text-dim); font-size: 24px;">+</span>`}
           </div>
         `;
       }
@@ -407,16 +444,14 @@
       document.getElementById('entry-modal').hidden = false;
     };
 
-    window.closeEntryModal = function() {
-      document.getElementById('entry-modal').hidden = true;
-    };
+    window.closeEntryModal = function() { document.getElementById('entry-modal').hidden = true; };
 
     const handleFileSelect = (e) => {
       const file = e.target.files[0];
       if (file) {
         pendingVideoFile = file;
         document.getElementById('video-status-text').hidden = false;
-        showToast("Video ready to lock in. Tap Save Entry.");
+        showToast("Media ready to lock in. Tap Encrypt & Save.");
       }
     };
     document.getElementById('camera-upload').addEventListener('change', handleFileSelect);
@@ -427,7 +462,7 @@
       if (!entries[activeModalDay]) entries[activeModalDay] = {};
       entries[activeModalDay].text = textVal;
       document.getElementById('entry-modal').hidden = true;
-      showToast("Encrypting entry...");
+      showToast("Encrypting entry into Vault...");
 
       if (pendingVideoFile && googleAccessToken) {
         const form = new FormData();
@@ -454,8 +489,6 @@
 
     window.streamVideo = async function(fileId) {
       if(!googleAccessToken) { alert("Session expired."); return; }
-      
-      // Auto-pause ambient audio when watching a diary video
       if(isAmbientPlaying) toggleAmbientAudio();
 
       document.getElementById('video-overlay').hidden = false;
@@ -521,4 +554,3 @@
   </script>
 </body>
 </html>
-
