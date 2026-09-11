@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#07080A">
 <link rel="apple-touch-icon" href="app-icon.png">
 <link rel="icon" href="app-icon.png" type="image/png">
+<link rel="manifest" href="manifest.json">
 <title>Life Reset OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -266,7 +267,8 @@
   <audio id="ambient-audio" src="onelife.mp4" loop preload="auto"></audio>
 
   <script type="module">
-            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -293,14 +295,16 @@
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('dashboard-date').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-    // --- AUTOPILOT SNAP ENGINE ---
+    // --- STRICT AUTOPILOT SNAP ENGINE (Must get the answer right) ---
     const autopilotSnaps = [
-      "RIDDLE: I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I? (Think laterally)",
-      "PARADOX: 'This statement is false.' If it is true, it is false. If it is false, it is true. Snap out of autopilot. What is your goal today?",
-      "LATERAL THINKING: A man pushes his car to a hotel and immediately goes bankrupt. Why? (Hint: He is playing a game).",
-      "TRICK QUESTION: You are running a race and pass the person in 2nd place. What place are you in?",
-      "FABLE: A samurai demanded a monk explain heaven and hell. The monk insulted him. The samurai drew his sword in rage. 'That is hell,' said the monk. The samurai calmed and sheathed his sword. 'And that is heaven.' What does this mean for your anger?"
+      { q: "RIDDLE: I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?", a: ["echo"] },
+      { q: "LATERAL THINKING: A man pushes his car to a hotel and immediately goes bankrupt. What game is he playing?", a: ["monopoly"] },
+      { q: "TRICK QUESTION: You are running a race and pass the person in 2nd place. What place are you in?", a: ["2nd", "second"] },
+      { q: "RIDDLE: The more you take, the more you leave behind. What are they?", a: ["footstep", "step", "steps"] },
+      { q: "RIDDLE: I have keys but no doors, space but no room. You can enter but not go outside. What am I?", a: ["keyboard"] }
     ];
+
+    let currentPuzzleIndex = 0;
 
     function runSplashAndFirewall() {
       document.getElementById('splash-streak').innerText = `DAY ${userData.streak || 0}`;
@@ -309,7 +313,8 @@
         setTimeout(() => {
           document.getElementById('splash-screen').hidden = true;
           const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-          document.getElementById('firewall-quote').innerText = autopilotSnaps[dayOfYear % autopilotSnaps.length];
+          currentPuzzleIndex = dayOfYear % autopilotSnaps.length;
+          document.getElementById('firewall-quote').innerText = autopilotSnaps[currentPuzzleIndex].q;
           document.getElementById('unlock-firewall').hidden = false;
         }, 500);
       }, 2000);
@@ -340,17 +345,22 @@
       }
     });
 
+    // --- STRICT ANSWER VALIDATION ---
     document.getElementById('btn-unlock-app').addEventListener('click', () => {
-      const input = document.getElementById('firewall-input').value;
-      if(input.length < 3) {
-        showToast("Solve the puzzle to unlock.");
-        return;
+      const input = document.getElementById('firewall-input').value.toLowerCase().trim();
+      const activePuzzle = autopilotSnaps[currentPuzzleIndex];
+      
+      const isCorrect = activePuzzle.a.some(ans => input.includes(ans));
+      
+      if(!isCorrect) {
+        showToast("Incorrect. Think deeper.");
+        return; // Stops the app from unlocking
       }
+      
       document.getElementById('unlock-firewall').hidden = true;
       updateUI();
     });
 
-    // --- RE-AUTH HELPER ---
     async function ensureDriveToken() {
       if(!googleAccessToken) {
         try {
@@ -383,39 +393,48 @@
       }
     });
 
-    // --- DATA RECOVERY & INIT ---
+    // --- BRUTE FORCE DATA RECOVERY ---
     async function loadData() {
       try {
         const docSnap = await getDoc(doc(db, "users", currentUser.uid));
+        let recoveredData = false;
+        
         if (docSnap.exists()) {
           userData = docSnap.data();
           if(!userData.history) userData.history = {};
           if(!userData.vision) userData.vision = {};
         }
         
-        // Recover old Day 1 video
-        if (userData.entries && userData.entries["day-1"] && !userData.history[todayStr]) {
-            userData.history[todayStr] = {
-                namaz: [false,false,false,false,false], quran: false, salam: false, media: "pending", sleep: "", exercise: 0, creativity: "",
-                vidId: userData.entries["day-1"].videoId || null,
-                journalText: userData.entries["day-1"].text || ""
-            };
-            userData.entries = {}; 
+        // This loop aggressively hunts down your old video and notes
+        if (userData.entries) {
+            Object.keys(userData.entries).forEach(oldKey => {
+                const oldData = userData.entries[oldKey];
+                if(oldData.text || oldData.videoId) {
+                    userData.history[`Legacy-${oldKey}`] = {
+                        namaz: [false,false,false,false,false], quran: false, salam: false, media: "pending", sleep: "", exercise: 0, creativity: "",
+                        vidId: oldData.videoId || null,
+                        journalText: oldData.text || ""
+                    };
+                    recoveredData = true;
+                }
+            });
+            delete userData.entries; // Delete old format so it isn't duplicated
+        }
+        
+        if (recoveredData) {
             await saveToCloud();
-            showToast("Legacy Protocol Recovered.");
+            showToast("Legacy Video & Notes Recovered into Archives.");
         }
         
         if(!userData.history[todayStr]) {
-          userData.history[todayStr] = { namaz: [false,false,false,false,false], quran: false, salam: false, media: "pending", sleep: "", exercise: 0, creativity: "", vidId: null };
+          userData.history[todayStr] = { namaz: [false,false,false,false,false], quran: false, salam: false, media: "pending", sleep: "", exercise: 0, creativity: "", vidId: null, journalText: "" };
         } 
         
         const allDays = Object.values(userData.history);
         const firstVid = allDays.find(d => d.vidId);
         if(firstVid) emergencyVideoId = firstVid.vidId;
 
-        // Load Vision Board Data & Fetch Images silently in background
         loadVisionBoard();
-
         runSplashAndFirewall();
       } catch (e) { showToast("Offline Mode."); }
     }
@@ -436,7 +455,7 @@
       showToast("Architecture Synced.");
     });
 
-    // --- CORE LOGIC & XP MATH ---
+    // --- XP MATH ---
     function applyCompoundXP(baseXP) {
       const multiplier = Math.pow(1.01, userData.streak || 0);
       userData.xp = (userData.xp || 0) + Math.round(baseXP * multiplier);
@@ -494,7 +513,7 @@
       }
     });
 
-    // --- VISION BOARD IMAGE & TEXT PIPELINE ---
+    // --- VISION BOARD UPLOAD PIPELINE ---
     const pillars = ['spiritual', 'fitness', 'partnership', 'craft'];
     
     function loadVisionBoard() {
@@ -508,21 +527,19 @@
               const blob = await res.blob();
               const url = URL.createObjectURL(blob);
               document.getElementById(`vision-bg-${pillar}`).style.backgroundImage = `url('${url}')`;
-            } catch(e) { console.log("Failed to fetch vision img", pillar); }
+            } catch(e) {}
           }
         }
       });
     }
 
     pillars.forEach(pillar => {
-      // Handle text changes
       document.getElementById(`vision-text-${pillar}`).addEventListener('change', (e) => {
         if(!userData.vision[pillar]) userData.vision[pillar] = {};
         userData.vision[pillar].text = e.target.value;
         saveToCloud();
       });
 
-      // Handle image uploads
       document.getElementById(`vision-file-${pillar}`).addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if(!file) return;
@@ -543,8 +560,6 @@
             if(!userData.vision[pillar]) userData.vision[pillar] = {};
             userData.vision[pillar].imgId = data.id;
             await saveToCloud();
-            
-            // Render locally without refreshing
             const localUrl = URL.createObjectURL(file);
             document.getElementById(`vision-bg-${pillar}`).style.backgroundImage = `url('${localUrl}')`;
             showToast("Vision Command Center Updated.");
@@ -553,7 +568,7 @@
       });
     });
 
-    // --- MEDIA PIPELINE (VAULT) ---
+    // --- VAULT PIPELINE ---
     document.getElementById('btn-record-vid').addEventListener('click', () => { document.getElementById('sys-camera').click(); });
 
     document.getElementById('sys-camera').addEventListener('change', (e) => {
@@ -626,6 +641,8 @@
       if(todayData.sleep) document.getElementById('sleep-time').value = todayData.sleep;
       if(todayData.exercise) document.getElementById('exercise-slider').value = todayData.exercise;
       if(todayData.creativity) document.getElementById('creativity-input').value = todayData.creativity;
+      
+      // Load current text into Vault
       if(todayData.journalText) document.getElementById('journal-input').value = todayData.journalText;
       
       buildGallery();
@@ -638,12 +655,12 @@
       
       Object.keys(userData.history).reverse().forEach(dateKey => {
         const entry = userData.history[dateKey];
-        if(entry.vidId) {
+        if(entry.vidId || entry.journalText) {
           gallery.innerHTML += `
-            <div class="media-thumbnail" onclick="window.streamVideo('${entry.vidId}')">
-              <span style="font-size:30px; margin-bottom: 8px;">📼</span>
-              <span style="font-size:12px; font-weight:700;">${dateKey.substring(5)}</span>
-              <div class="play-badge">▶️</div>
+            <div class="media-thumbnail" ${entry.vidId ? `onclick="window.streamVideo('${entry.vidId}')"` : ''}>
+              ${entry.vidId ? '<span style="font-size:30px; margin-bottom: 8px;">📼</span><div class="play-badge">▶️</div>' : '<span style="font-size:30px; margin-bottom: 8px;">📝</span>'}
+              <span style="font-size:12px; font-weight:700;">${dateKey.replace('Legacy-', '')}</span>
+              ${entry.journalText ? `<div style="font-size:8px; opacity:0.6; padding:0 4px; text-align:center; margin-top:4px;">${entry.journalText.substring(0, 15)}...</div>` : ''}
             </div>
           `;
         }
