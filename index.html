@@ -2,26 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- Native App Meta Tags -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#07080A">
+<link rel="apple-touch-icon" href="app-icon.png">
+<link rel="icon" href="app-icon.png" type="image/png">
+
 <title>Life Reset OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-void: #07080A; 
-    --bg-panel: #131519; 
-    --bg-glass: rgba(19, 21, 25, 0.7);
-    --accent-orange: #FF5E00;
-    --text-primary: #F2F4F7; 
-    --text-dim: #7C838F;
-    --font-display: 'Rajdhani', sans-serif; 
-    --font-body: 'Inter', sans-serif;
+    --bg-void: #07080A; --bg-panel: #131519; --bg-glass: rgba(19, 21, 25, 0.85);
+    --accent-orange: #FF5E00; --text-primary: #F2F4F7; --text-dim: #7C838F;
+    --font-display: 'Rajdhani', sans-serif; --font-body: 'Inter', sans-serif;
   }
-  
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
   body { background: var(--bg-void); color: var(--text-primary); font-family: var(--font-body); overflow-x: hidden; padding-bottom: 110px; }
   [hidden] { display: none !important; }
 
-  /* LOCK SCREEN */
   #lock-screen { position: fixed; inset: 0; z-index: 500; background: var(--bg-void); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
   .vault-title { font-family: var(--font-display); font-size: 36px; font-weight: 700; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; background: linear-gradient(90deg, #fff, #7C838F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .vault-sub { font-size: 14px; color: var(--text-dim); margin-bottom: 40px; }
@@ -38,13 +38,16 @@
   .day-tracker { font-family: var(--font-display); font-size: 30px; font-weight: 700; }
   .day-sub { color: var(--text-dim); font-size: 13px; font-weight: 500; }
 
-  /* AMBIENT AUDIO TOGGLE */
   .audio-toggle { background: var(--bg-glass); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; backdrop-filter: blur(5px); }
   .audio-toggle.playing { border-color: var(--accent-orange); color: var(--accent-orange); }
 
   #status-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--accent-orange); color: #fff; padding: 12px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 1000; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
-  /* CINEMATIC HABIT CARDS (Restored) */
+  /* PHILOSOPHICAL ENGINE UI */
+  .philosophy-card { background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid var(--accent-orange); border-radius: 16px; padding: 20px; margin-bottom: 24px; backdrop-filter: blur(10px); }
+  .phil-author { font-size: 11px; color: var(--accent-orange); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .phil-text { font-size: 15px; font-style: italic; color: #E2E8F0; line-height: 1.6; font-weight: 500; }
+
   .section-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 16px; margin-top: 24px; }
   .habit-card { position: relative; height: 135px; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 16px; margin-bottom: 16px; box-shadow: inset 0 -60px 50px -10px rgba(0,0,0,0.85); cursor: pointer; transition: transform 0.1s; border: 1px solid rgba(255,255,255,0.1); }
   .habit-card:active { transform: scale(0.97); }
@@ -56,26 +59,23 @@
   .habit-meta { display: flex; gap: 16px; font-size: 12px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
   .meta-item { display: flex; align-items: center; gap: 4px; }
 
-  /* TOUCH-OPTIMIZED PROTOCOL BUILDER */
   .task-builder { background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 16px; margin-bottom: 24px; }
   .task-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 16px; border-radius: 12px; color: #fff; outline: none; font-size: 15px; font-family: var(--font-body); margin-bottom: 12px; }
   .task-input:focus { border-color: var(--accent-orange); }
 
-  /* DATE SHEETS & MODALS */
   .day-sheet-card { background: var(--bg-panel); border-radius: 16px; padding: 18px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
   .day-sheet-info { display: flex; flex-direction: column; gap: 4px; }
   .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
   .status-empty { background: #444; }
   .status-filled { background: #00E676; box-shadow: 0 0 10px rgba(0, 230, 118, 0.4); }
 
-  #entry-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 400; display: flex; flex-direction: column; justify-content: flex-end; }
+  #entry-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 400; display: flex; flex-direction: column; justify-content: flex-end; }
   .modal-content { background: var(--bg-panel); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 24px; height: 85vh; display: flex; flex-direction: column; border-top: 1px solid rgba(255,255,255,0.1); }
   
   .diary-textarea { flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; color: #fff; font-family: var(--font-body); font-size: 15px; resize: none; outline: none; margin-bottom: 20px; line-height: 1.5; }
   .media-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-  .btn-record { background: #FF3B30; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; }
+  .btn-record { background: #FF3B30; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; }
 
-  /* BOTTOM NAVIGATION & VOICE */
   .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(19, 21, 25, 0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-around; align-items: center; z-index: 200; padding-bottom: env(safe-area-inset-bottom); }
   .nav-item { background: none; border: none; color: var(--text-dim); font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
   .nav-item.active { color: var(--accent-orange); }
@@ -93,17 +93,13 @@
 
   <div id="status-toast"></div>
 
-  <!-- LOCK SCREEN -->
   <div id="lock-screen">
     <div class="vault-title">Life Reset OS</div>
     <div class="vault-sub">बहनचोद कायी हो जाएगा, करो.</div>
     <button class="btn-primary" id="btn-login">SYSTEM UPLINK</button>
   </div>
 
-  <!-- SCREEN 1: DASHBOARD -->
   <div id="screen-dashboard" class="screen active">
-    
-    <!-- Cinematic Header -->
     <div style="position: relative; width: 100%; border-radius: 20px; overflow: hidden; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
       <video src="onelife.mp4" autoplay loop muted playsinline style="width: 100%; height: 130px; object-fit: cover; filter: contrast(1.2); pointer-events: none;"></video>
       <div style="position: absolute; bottom: 12px; right: 12px;">
@@ -114,7 +110,7 @@
     <div class="header">
       <div>
         <div class="day-tracker" id="current-day-label">Day 1 / 60+</div>
-        <div class="day-sub" id="user-greeting">System Active, Husain. Protocol Live.</div>
+        <div class="day-sub">System Active, Husain.</div>
       </div>
       <div style="text-align: right;">
         <div style="font-size: 24px; font-weight: 700; color: var(--accent-orange); font-family: var(--font-display);" id="xp-val">0 XP</div>
@@ -122,7 +118,12 @@
       </div>
     </div>
 
-    <!-- TOUCH-OPTIMIZED PROTOCOL BUILDER -->
+    <!-- PHILOSOPHY ENGINE -->
+    <div class="philosophy-card">
+      <div class="phil-author">🧠 Daily Architecture</div>
+      <div class="phil-text" id="philosophy-text">Loading directive...</div>
+    </div>
+
     <div class="section-title">Architect New Protocol</div>
     <div class="task-builder">
       <input type="text" id="custom-task-text" class="task-input" placeholder="e.g. 2 Hours Deep Work, No Sugar...">
@@ -139,7 +140,6 @@
     <div id="tasks-container"></div>
   </div>
 
-  <!-- SCREEN 2: DATE SHEETS & DIARY -->
   <div id="screen-vault" class="screen">
     <div class="header">
       <div class="day-tracker">Chronicle Sheets</div>
@@ -151,7 +151,6 @@
     <div id="chronological-days-container"></div>
   </div>
 
-  <!-- SCREEN 3: SYSTEM -->
   <div id="screen-stats" class="screen">
     <div class="header">
       <div class="day-tracker">System Core</div>
@@ -162,12 +161,11 @@
       <div style="font-size: 13px; color: var(--text-dim); line-height: 1.6;">
         • Drive Scope: AppDataFolder (Hidden Vault)<br>
         • Privacy Status: Invisible to Main Google Drive<br>
-        • Firestore: Rules Unlocked (Test Mode)<br>
+        • App Status: Native PWA Ready<br>
       </div>
     </div>
   </div>
 
-  <!-- DIARY MODAL -->
   <div id="entry-modal" hidden>
     <div class="modal-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -178,7 +176,7 @@
       <div style="font-size: 12px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Captain's Log (Text Diary)</div>
       <textarea id="diary-text" class="diary-textarea" placeholder="Record your mindset, cravings, and reflections for today..."></textarea>
       
-      <div id="video-status-text" style="text-align: center; font-size: 13px; color: #00E676; margin-bottom: 12px; font-weight: 700;" hidden>✓ Video Locked In Memory. Ready to save.</div>
+      <div id="video-status-text" style="text-align: center; font-size: 13px; color: #00E676; margin-bottom: 12px; font-weight: 700;" hidden>✓ Video Loaded in Buffer. Tap Encrypt & Save to Vault.</div>
 
       <div class="media-controls">
         <button class="btn-record" onclick="document.getElementById('camera-upload').click()">📷 Record Video</button>
@@ -240,7 +238,22 @@
     let pendingVideoFile = null; 
     let isAmbientPlaying = false;
 
-    // Premium Backgrounds & Icons for dynamically created habits
+    // --- PHILOSOPHICAL ENGINE ---
+    const husainDirectives = [
+      "Husain, play iterated games. All the returns in life, whether in wealth, relationships, or knowledge, come from compound interest. Do the work today.",
+      "Specific knowledge is found by pursuing your genuine curiosity. HN Visuals is your leverage. Build the media, write the code, scale your impact.",
+      "Impatience with actions, patience with results. A fit body, a calm mind, and a house full of love cannot be bought—they must be earned.",
+      "The hardest thing is not doing what you want—it's knowing what you want. Fortify your mind. You are the architect of this 60-day sequence.",
+      "Learn to sell. Learn to build. If you can do both, you will be unstoppable. Leverage tech, leverage media, leverage yourself."
+    ];
+
+    function injectDailyPhilosophy() {
+      // Rotate the quote based on the current day of the year so it changes daily
+      const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+      const index = dayOfYear % husainDirectives.length;
+      document.getElementById('philosophy-text').innerText = `"${husainDirectives[index]}"`;
+    }
+
     const cinematicBgs = [
       'https://images.unsplash.com/photo-1470071131384-001b85755b36?auto=format&fit=crop&w=600&q=80',
       'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=600&q=80',
@@ -250,14 +263,12 @@
     const cinematicIcons = ['⚡', '🎯', '🔥', '⚔️', '🧠'];
 
     const toast = document.getElementById('status-toast');
-    function showToast(text, duration = 3500) {
+    function showToast(text, duration = 4000) {
       toast.innerText = text;
       toast.style.display = 'block';
       setTimeout(() => { toast.style.display = 'none'; }, duration);
     }
 
-    // --- GLOBAL BINDINGS ---
-    // These functions must be on 'window' so the dynamically generated HTML strings can click them.
     window.toggleAmbientAudio = function() {
       const audio = document.getElementById('ambient-audio');
       const btn = document.getElementById('audio-toggle-btn');
@@ -283,28 +294,15 @@
       btn.classList.add('active');
     };
 
-    // --- SECURE EVENT LISTENERS ---
-    // Using proper event listeners bypasses mobile browser inline 'onclick' blocking
     document.getElementById('btn-add-task').addEventListener('click', async () => {
       const textInput = document.getElementById('custom-task-text');
       const typeInput = document.getElementById('custom-task-type');
-      if(!textInput.value.trim()) {
-        showToast("Please enter protocol logic first.");
-        return;
-      }
+      if(!textInput.value.trim()) { showToast("Enter protocol logic first."); return; }
       
       const randomBg = cinematicBgs[Math.floor(Math.random() * cinematicBgs.length)];
       const randomIcon = cinematicIcons[Math.floor(Math.random() * cinematicIcons.length)];
 
-      userTasks.push({ 
-        id: Date.now(), 
-        text: textInput.value.trim(), 
-        type: typeInput.value, 
-        done: false,
-        bg: randomBg,
-        icon: randomIcon
-      });
-      
+      userTasks.push({ id: Date.now(), text: textInput.value.trim(), type: typeInput.value, done: false, bg: randomBg, icon: randomIcon });
       textInput.value = '';
       updateDashboardUI();
       showToast("Protocol Initialized.");
@@ -312,6 +310,10 @@
     });
 
     document.getElementById('btn-login').addEventListener('click', async () => {
+      await performGoogleUplink();
+    });
+
+    async function performGoogleUplink() {
       const provider = new GoogleAuthProvider();
       provider.addScope('https://www.googleapis.com/auth/drive.appdata');
       try {
@@ -320,10 +322,11 @@
         currentUser = result.user;
         document.getElementById('lock-screen').hidden = true;
         await loadUserData();
+        showToast("System Uplink Established.");
       } catch (error) {
         showToast("Uplink Failed. Check connection.");
       }
-    });
+    }
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -335,6 +338,8 @@
 
     async function loadUserData() {
       if (!currentUser) return;
+      injectDailyPhilosophy();
+      
       try {
         const docSnap = await getDoc(doc(db, "users", currentUser.uid));
         if (docSnap.exists()) {
@@ -369,7 +374,6 @@
       const container = document.getElementById('tasks-container');
       container.innerHTML = '';
       
-      // Injecting the exact cinematic layout from the screenshots
       userTasks.forEach(task => {
         const bgImg = task.bg || cinematicBgs[0];
         const taskIcon = task.icon || '⚡';
@@ -377,7 +381,6 @@
         container.innerHTML += `
           <div class="habit-card" onclick="window.toggleTask(${task.id})" style="transform: ${task.done ? 'scale(0.98)' : 'scale(1)'}; border-color: ${task.done ? 'var(--accent-orange)' : 'rgba(255,255,255,0.1)'};">
             <div class="habit-bg" style="background-image: url('${bgImg}'); filter: ${task.done ? 'grayscale(100%) brightness(0.4)' : 'brightness(0.7)'};"></div>
-            
             <div class="habit-header">
               <div class="habit-icon">${taskIcon}</div>
               <div>
@@ -385,7 +388,6 @@
                 <div class="habit-sub" style="color: ${task.done ? 'var(--accent-orange)' : 'rgba(255,255,255,0.8)'}">${task.type} Protocol • ${task.done ? 'EXECUTED' : 'TAP TO COMPLETE'}</div>
               </div>
             </div>
-            
             <div class="habit-meta">
               <div class="meta-item">🔥 +30 XP</div>
               <div class="meta-item" style="color: #FFC24B;">⭐ ⭐ ⭐</div>
@@ -451,7 +453,7 @@
       if (file) {
         pendingVideoFile = file;
         document.getElementById('video-status-text').hidden = false;
-        showToast("Media ready to lock in. Tap Encrypt & Save.");
+        showToast("Video loaded in buffer. Tap Encrypt & Save.");
       }
     };
     document.getElementById('camera-upload').addEventListener('change', handleFileSelect);
@@ -462,6 +464,19 @@
       if (!entries[activeModalDay]) entries[activeModalDay] = {};
       entries[activeModalDay].text = textVal;
       document.getElementById('entry-modal').hidden = true;
+
+      if (pendingVideoFile && !googleAccessToken) {
+        showToast("Re-establishing Google Drive connection...");
+        try {
+          const provider = new GoogleAuthProvider();
+          provider.addScope('https://www.googleapis.com/auth/drive.appdata');
+          const result = await signInWithPopup(auth, provider);
+          googleAccessToken = GoogleAuthProvider.credentialFromResult(result).accessToken;
+        } catch (e) {
+          showToast("Drive authorization failed. Saving text only.");
+        }
+      }
+
       showToast("Encrypting entry into Vault...");
 
       if (pendingVideoFile && googleAccessToken) {
@@ -474,21 +489,37 @@
             method: 'POST', headers: { 'Authorization': 'Bearer ' + googleAccessToken }, body: form
           });
           const data = await res.json();
-          entries[activeModalDay].videoId = data.id;
-          showToast(`Media & Journal locked into Vault.`);
+          if(data.id) {
+            entries[activeModalDay].videoId = data.id;
+            showToast(`Media & Journal locked into Vault.`);
+          } else {
+            showToast("Cloud storage rejection. Check connection.");
+          }
         } catch (err) {
-          showToast("Media upload failed, but journal text saved.");
+          showToast("Media upload error. Text saved successfully.");
         }
       } else {
-        showToast("Journal text saved.");
+        showToast("Journal entry saved.");
       }
       
+      pendingVideoFile = null;
       await saveToCloud();
       buildDateSheetsUI();
     };
 
     window.streamVideo = async function(fileId) {
-      if(!googleAccessToken) { alert("Session expired."); return; }
+      if(!googleAccessToken) {
+        try {
+          const provider = new GoogleAuthProvider();
+          provider.addScope('https://www.googleapis.com/auth/drive.appdata');
+          const result = await signInWithPopup(auth, provider);
+          googleAccessToken = GoogleAuthProvider.credentialFromResult(result).accessToken;
+        } catch(e) {
+          alert("Authorization required to decrypt media.");
+          return;
+        }
+      }
+
       if(isAmbientPlaying) toggleAmbientAudio();
 
       document.getElementById('video-overlay').hidden = false;
