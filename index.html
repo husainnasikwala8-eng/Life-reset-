@@ -309,11 +309,20 @@
       recognition.continuous = false;
       recognition.lang = 'en-US';
 
-      micBtn.addEventListener('click', () => {
+        micBtn.addEventListener('click', () => {
+        // --- BROWSER AUDIO UNLOCK HACK ---
+        const audio = document.getElementById('bg-audio');
+        audio.play().then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+        }).catch(err => console.log("Audio waiting for user gesture..."));
+        // ----------------------------------
+
         micBtn.classList.add('recording');
         micBtn.innerText = "Listening...";
         recognition.start();
       });
+      
 
       recognition.onresult = async (event) => {
         micBtn.classList.remove('recording');
