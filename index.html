@@ -19,12 +19,12 @@
   }
   
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-  body { background: var(--bg-void); color: var(--text-primary); font-family: var(--font-body); overflow-x: hidden; }
+  body { background: var(--bg-void); color: var(--text-primary); font-family: var(--font-body); overflow-x: hidden; padding-bottom: 95px; }
   [hidden] { display: none !important; }
 
-  /* --- LOCK SCREEN --- */
+  /* LOCK SCREEN */
   #lock-screen {
-    position: fixed; inset: 0; z-index: 200; background: var(--bg-void); display: flex; flex-direction: column;
+    position: fixed; inset: 0; z-index: 300; background: var(--bg-void); display: flex; flex-direction: column;
     align-items: center; justify-content: center; padding: 24px; text-align: center;
   }
   .vault-title { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; }
@@ -32,152 +32,195 @@
   .btn-primary {
     background: var(--accent-orange); color: #fff; border: none; padding: 16px 32px; border-radius: 12px;
     font-family: var(--font-body); font-weight: 600; font-size: 16px; cursor: pointer;
-    box-shadow: 0 8px 24px var(--accent-orange-dim); transition: transform 0.2s; width: 100%; max-width: 300px;
+    box-shadow: 0 8px 24px var(--accent-orange-dim); width: 100%; max-width: 300px;
   }
-  .btn-primary:active { transform: scale(0.96); }
 
-  /* --- MAIN DASHBOARD --- */
-  #dashboard { padding: 24px 20px; padding-bottom: 100px; }
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-  .day-tracker { font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+  /* SCREENS */
+  .screen { padding: 20px; display: none; }
+  .screen.active { display: block; }
+
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .day-tracker { font-family: var(--font-display); font-size: 26px; font-weight: 700; }
   .day-sub { color: var(--text-dim); font-size: 13px; font-weight: 500; }
   
-  /* Stats Grid */
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+  #status-toast {
+    background: var(--bg-panel-raised); border: 1px solid var(--accent-orange); color: var(--text-primary);
+    padding: 10px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; text-align: center; display: none;
+  }
+
+  /* PROGRESS BAR */
+  .progress-container { background: var(--bg-panel); border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
+  .progress-info { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 8px; color: var(--text-dim); }
+  .progress-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--accent-orange); width: 0%; transition: width 0.3s ease; }
+
+  /* STATS GRID */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
   .stat-card {
     background: var(--bg-panel); border-radius: 16px; padding: 16px; display: flex; flex-direction: column;
-    border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
   }
   .stat-card.overall { background: var(--accent-orange); border: none; color: #fff; }
   .stat-card.overall .stat-val { color: #fff; }
   .stat-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; opacity: 0.8; }
-  .stat-val { font-size: 24px; font-weight: 700; font-family: var(--font-display); color: var(--text-primary); }
-  .stat-trend { font-size: 11px; color: var(--accent-orange); font-weight: 700; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-left: 6px; }
-  .stat-card.overall .stat-trend { color: var(--accent-orange); background: #fff; }
+  .stat-val { font-size: 24px; font-weight: 700; font-family: var(--font-display); }
 
-  /* Habit Cards */
-  .section-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; gap: 12px; }
-  .habit-list { display: flex; flex-direction: column; gap: 16px; }
-  .habit-card {
-    position: relative; height: 140px; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 16px;
-    box-shadow: inset 0 -60px 50px -10px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.2s;
-  }
-  .habit-card:active { transform: scale(0.98); }
-  .habit-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: -1; opacity: 0.6; }
-  .habit-header { display: flex; align-items: center; gap: 12px; }
-  .habit-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-  .habit-name { font-weight: 600; font-size: 16px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-  .habit-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
-  .habit-meta { display: flex; gap: 16px; font-size: 12px; font-weight: 500; }
-  .meta-item { display: flex; align-items: center; gap: 4px; }
+  /* CUSTOM TASK BUILDER */
+  .task-input-box { display: flex; gap: 8px; margin-bottom: 20px; }
+  .task-input { flex: 1; background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; color: #fff; font-family: var(--font-body); font-size: 14px; outline: none; }
+  .task-select { background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; color: #fff; font-family: var(--font-body); outline: none; }
   
-  /* Controls */
-  .floating-controls { position: fixed; bottom: 24px; left: 24px; right: 24px; display: flex; gap: 12px; z-index: 100; }
-  .btn-mic { flex: 1; background: var(--bg-panel-raised); border: 1px solid rgba(255,94,0,0.3); color: var(--accent-orange); padding: 16px; border-radius: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .btn-mic.recording { background: var(--accent-orange); color: #fff; animation: pulse 1s infinite; }
-  .btn-vault { width: 60px; height: 60px; background: var(--bg-panel-raised); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 1px solid rgba(255,255,255,0.1); }
+  .section-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 12px; margin-top: 20px; }
+  
+  .task-card {
+    background: var(--bg-panel); border-radius: 14px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .task-info { display: flex; flex-direction: column; gap: 4px; }
+  .task-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; width: fit-content; font-weight: 600; text-transform: uppercase; }
+  .badge-day { background: rgba(255, 194, 75, 0.15); color: #FFC24B; }
+  .badge-night { background: rgba(93, 169, 255, 0.15); color: #5DA9FF; }
 
-  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  /* CHRONOLOGICAL DAY-WISE VAULT GRID */
+  .day-vault-card {
+    background: var(--bg-panel); border-radius: 16px; padding: 16px; margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;
+  }
 
-  /* Video Player */
+  /* BOTTOM NAVIGATION BAR */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: var(--bg-panel);
+    border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-around; align-items: center; z-index: 200;
+  }
+  .nav-item { background: none; border: none; color: var(--text-dim); font-size: 12px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+  .nav-item.active { color: var(--accent-orange); }
+  .nav-icon { font-size: 20px; }
+
+  /* FLOATING VOICE TRIGGER */
+  .voice-float { position: fixed; bottom: 85px; right: 20px; background: var(--accent-orange); color: #fff; width: 56px; height: 56px; border-radius: 50%; border: none; font-size: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(255,94,0,0.4); z-index: 250; cursor: pointer; }
+  .voice-float.recording { animation: pulse 1s infinite; }
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+  /* VIDEO PLAYER OVERLAY */
   #video-overlay { position: fixed; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   video { width: 100%; max-height: 80vh; object-fit: contain; }
-  .close-video { position: absolute; top: 40px; right: 20px; color: #fff; font-size: 16px; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; border: none; font-weight: bold; }
+  .close-video { position: absolute; top: 40px; right: 20px; color: #fff; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; }
 </style>
 </head>
 <body>
 
+  <!-- LOCK SCREEN -->
   <div id="lock-screen">
     <div class="vault-title">The Vault</div>
     <div class="vault-sub">बहनचोद कायी हो जाएगा, करो.</div>
     <button class="btn-primary" id="btn-login">SYSTEM UPLINK (LOGIN)</button>
   </div>
 
-  <div id="dashboard" hidden>
-  <!-- Looping Vibe Visual -->
-<div style="width: 100%; border-radius: 16px; overflow: hidden; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0, 229, 255, 0.1);">
-  <video src="onelife.mp4" autoplay loop muted playsinline style="width: 100%; height: 120px; object-fit: cover; filter: contrast(1.2) saturate(1.2); pointer-events: none;"></video>
-</div>
+  <!-- SCREEN 1: DASHBOARD -->
+  <div id="screen-dashboard" class="screen active">
+    <div style="width: 100%; border-radius: 16px; overflow: hidden; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1);">
+      <video src="onelife.mp4" autoplay loop muted playsinline style="width: 100%; height: 100px; object-fit: cover; filter: contrast(1.2); pointer-events: none;"></video>
+    </div>
+
     <div class="header">
       <div>
-        <div class="day-tracker">Day 1/40</div>
-        <div class="day-sub" id="user-greeting">Welcome back, Husain.</div>
+        <div class="day-tracker" id="current-day-label">Day 1 / 40+</div>
+        <div class="day-sub">Custom Protocol Active</div>
+      </div>
+    </div>
+
+    <div id="status-toast"></div>
+
+    <div class="progress-container">
+      <div class="progress-info">
+        <span>Timeline Progress</span>
+        <span id="progress-percent">2.5%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
       </div>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card overall">
-        <div class="stat-title">✦ Overall XP</div>
+        <div class="stat-title">✦ Total XP</div>
         <div class="stat-val" id="xp-val">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-title">🛡️ Discipline</div>
-        <div class="stat-val">Level 1 <span class="stat-trend">+0</span></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-title">🎯 Focus</div>
-        <div class="stat-val">Level 1 <span class="stat-trend">+0</span></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-title">⚡ Strength</div>
-        <div class="stat-val">Level 1 <span class="stat-trend">+0</span></div>
+        <div class="stat-title">🛡️ Discipline Rank</div>
+        <div class="stat-val" id="rank-val">Novice</div>
       </div>
     </div>
 
-    <div class="section-title">
-      <span style="color:var(--text-primary)">To-dos</span>
-      <span style="color:var(--text-dim)">Done</span>
-    </div>
-    
-    <div class="habit-list">
-      <div class="habit-card" onclick="completeHabit(50)">
-        <div class="habit-bg" style="background-image: url('https://images.unsplash.com/photo-1470071131384-001b85755b36?auto=format&fit=crop&w=600&q=80');"></div>
-        <div class="habit-header">
-          <div class="habit-icon">🌅</div>
-          <div>
-            <div class="habit-name">Wake up at 5 AM</div>
-            <div class="habit-sub">Rise before everyone, seize the day.</div>
-          </div>
-        </div>
-        <div class="habit-meta">
-          <div class="meta-item">🔥 1 Day</div>
-          <div class="meta-item">⭐ ⭐ ⭐</div>
-        </div>
-      </div>
-
-      <div class="habit-card" onclick="completeHabit(30)">
-        <div class="habit-bg" style="background-image: url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=600&q=80');"></div>
-        <div class="habit-header">
-          <div class="habit-icon">💻</div>
-          <div>
-            <div class="habit-name">Deep Work Protocol</div>
-            <div class="habit-sub">1% Upgrade. Build the future board.</div>
-          </div>
-        </div>
-        <div class="habit-meta">
-          <div class="meta-item">🔥 1 Day</div>
-          <div class="meta-item">⭐ ⭐ ⭐ ⭐</div>
-        </div>
-      </div>
+    <div class="section-title">Add Custom Protocol</div>
+    <div class="task-input-box">
+      <input type="text" id="custom-task-text" class="task-input" placeholder="e.g., No sugar, 2 hours deep work...">
+      <select id="custom-task-type" class="task-select">
+        <option value="Day">☀️ Day</option>
+        <option value="Night">🌙 Night</option>
+      </select>
+      <button class="btn-primary" style="width: auto; padding: 12px 16px;" onclick="addCustomTask()">Add</button>
     </div>
 
-    <div class="floating-controls">
-      <button class="btn-mic" id="btn-mic">🎙️ Voice Trigger</button>
-      <button class="btn-vault" id="btn-upload">➕</button>
-      <input type="file" id="video-upload" accept="video/mp4" hidden>
+    <div class="section-title">Today's Protocols</div>
+    <div id="tasks-container"></div>
+  </div>
+
+  <!-- SCREEN 2: CHRONOLOGICAL VAULT (DAYS 1 TO 60+) -->
+  <div id="screen-vault" class="screen">
+    <div class="header">
+      <div class="day-tracker">Chronological Vault</div>
+      <div class="day-sub">Day-Wise Video Archives</div>
+    </div>
+    <div style="font-size: 13px; color: var(--text-dim); margin-bottom: 16px;">
+      Select any day below to lock in or review that specific day's video entry.
+    </div>
+    <div id="chronological-days-container"></div>
+  </div>
+
+  <!-- SCREEN 3: SYSTEM -->
+  <div id="screen-stats" class="screen">
+    <div class="header">
+      <div class="day-tracker">System Overview</div>
+      <div class="day-sub">Endless Evolution</div>
+    </div>
+    <div class="stat-card" style="margin-bottom: 16px;">
+      <div class="stat-title">Architecture Status</div>
+      <div style="font-size: 14px; color: var(--text-dim); margin-top: 4px;">Connected to Firebase Firestore & Google Drive AppDataFolder (5TB Storage). Memory-leak protection patched.</div>
     </div>
   </div>
 
+  <!-- FLOATING VOICE TRIGGER -->
+  <button class="voice-float" id="btn-mic" title="Voice Intervention">🎙️</button>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchScreen('dashboard', this)">
+      <span class="nav-icon">⚡</span>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-item" onclick="switchScreen('vault', this)">
+      <span class="nav-icon">📼</span>
+      <span>Chronicle Vault</span>
+    </button>
+    <button class="nav-item" onclick="switchScreen('stats', this)">
+      <span class="nav-icon">📊</span>
+      <span>System</span>
+    </button>
+  </nav>
+
+  <!-- VIDEO OVERLAY -->
   <div id="video-overlay" hidden>
     <button class="close-video" onclick="closeVideo()">CLOSE</button>
     <video id="player" controls playsinline></video>
   </div>
   
-  <audio id="bg-audio" src="onelife.mp4"></audio>
+  <input type="file" id="global-video-upload" accept="video/mp4" hidden>
+  <audio id="bg-audio" src="onelife.mp4" preload="auto"></audio>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -196,65 +239,160 @@
     let googleAccessToken = null;
     let currentUser = null;
     let totalXP = 0;
+    let userTasks = [];
+    let dayVideos = {}; 
+    let targetUploadDay = null;
+
+    const toast = document.getElementById('status-toast');
+    function showToast(text, duration = 3500) {
+      toast.innerText = text;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, duration);
+    }
+
+    window.switchScreen = function(screenName, btn) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`screen-${screenName}`).classList.add('active');
+      btn.classList.add('active');
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('lock-screen').hidden = true;
+        await loadUserData();
+        buildChronologicalVaultUI();
+      }
+    });
 
     document.getElementById('btn-login').addEventListener('click', async () => {
       const provider = new GoogleAuthProvider();
       provider.addScope('https://www.googleapis.com/auth/drive.appdata');
-      
       try {
         const result = await signInWithPopup(auth, provider);
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        googleAccessToken = credential.accessToken;
+        googleAccessToken = GoogleAuthProvider.credentialFromResult(result).accessToken;
         currentUser = result.user;
-        
         document.getElementById('lock-screen').hidden = true;
-        document.getElementById('dashboard').hidden = false;
-        
-        loadUserData();
+        await loadUserData();
+        buildChronologicalVaultUI();
       } catch (error) {
-        console.error("Login Failed:", error);
-        alert("System Uplink Failed.");
+        alert("Uplink Failed: " + error.message);
       }
     });
 
     async function loadUserData() {
-      const userRef = doc(db, "users", currentUser.uid);
-      const docSnap = await getDoc(userRef);
+      if (!currentUser) return;
+      const docSnap = await getDoc(doc(db, "users", currentUser.uid));
       if (docSnap.exists()) {
-        totalXP = docSnap.data().xp || 0;
+        const data = docSnap.data();
+        totalXP = data.xp || 0;
+        userTasks = data.tasks || [
+          { id: 1, text: "Wake up at 5 AM", type: "Day", done: false },
+          { id: 2, text: "Review future board & zero distractions", type: "Night", done: false }
+        ];
+        dayVideos = data.dayVideos || {};
       } else {
-        await setDoc(userRef, { xp: 0, level: 1 });
+        userTasks = [
+          { id: 1, text: "Wake up at 5 AM", type: "Day", done: false },
+          { id: 2, text: "Review future board & zero distractions", type: "Night", done: false }
+        ];
+        await setDoc(doc(db, "users", currentUser.uid), { xp: 0, tasks: userTasks, dayVideos: {} });
       }
-      document.getElementById('xp-val').innerText = totalXP;
+      updateDashboardUI();
     }
 
-    window.completeHabit = async function(xpGained) {
-      if(!currentUser) return;
-      totalXP += xpGained;
+    function updateDashboardUI() {
       document.getElementById('xp-val').innerText = totalXP;
+      let percent = Math.min(100, (totalXP / 2000) * 100).toFixed(1);
+      document.getElementById('progress-percent').innerText = percent + "%";
+      document.getElementById('progress-fill').style.width = percent + "%";
+
+      const container = document.getElementById('tasks-container');
+      container.innerHTML = '';
       
-      document.getElementById('xp-val').style.color = '#fff';
-      setTimeout(() => document.getElementById('xp-val').style.color = '', 300);
-      
-      await setDoc(doc(db, "users", currentUser.uid), { xp: totalXP }, { merge: true });
+      userTasks.forEach(task => {
+        container.innerHTML += `
+          <div class="task-card" style="opacity: ${task.done ? 0.5 : 1};">
+            <div class="task-info">
+              <span class="task-badge ${task.type === 'Day' ? 'badge-day' : 'badge-night'}">${task.type} Protocol</span>
+              <div style="font-weight: 500; font-size: 14px; text-decoration: ${task.done ? 'line-through' : 'none'};">${task.text}</div>
+            </div>
+            <button class="btn-primary" style="width: auto; padding: 6px 14px; font-size: 12px;" onclick="toggleTask(${task.id})">${task.done ? 'Done' : '+30 XP'}</button>
+          </div>
+        `;
+      });
+      buildChronologicalVaultUI();
+    }
+
+    window.addCustomTask = async function() {
+      const textInput = document.getElementById('custom-task-text');
+      const typeInput = document.getElementById('custom-task-type');
+      if(!textInput.value.trim()) return;
+
+      userTasks.push({ id: Date.now(), text: textInput.value.trim(), type: typeInput.value, done: false });
+      textInput.value = '';
+      await saveUserDataToCloud();
+      updateDashboardUI();
+      showToast("New protocol added successfully.");
     };
 
-    document.getElementById('btn-upload').addEventListener('click', () => {
-      document.getElementById('video-upload').click();
-    });
+    window.toggleTask = async function(id) {
+      const task = userTasks.find(t => t.id === id);
+      if(task && !task.done) {
+        task.done = true;
+        totalXP += 30;
+        await saveUserDataToCloud();
+        updateDashboardUI();
+        showToast("Protocol executed! +30 XP");
+      }
+    };
 
-    document.getElementById('video-upload').addEventListener('change', async (e) => {
+    async function saveUserDataToCloud() {
+      if(!currentUser) return;
+      await setDoc(doc(db, "users", currentUser.uid), { xp: totalXP, tasks: userTasks, dayVideos }, { merge: true });
+    }
+
+    function buildChronologicalVaultUI() {
+      const container = document.getElementById('chronological-days-container');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= 60; i++) {
+        const dayKey = `day-${i}`;
+        const hasVideo = dayVideos[dayKey] ? true : false;
+
+        container.innerHTML += `
+          <div class="day-vault-card">
+            <div>
+              <div style="font-family: var(--font-display); font-weight: 700; font-size: 16px;">Day ${i}</div>
+              <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">${hasVideo ? '🔒 Vault Video Locked' : '⚠️ No entry recorded'}</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              ${hasVideo ? `<button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="streamVideo('${dayVideos[dayKey]}')">Play</button>` : ''}
+              <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 12px; background: var(--bg-panel-raised); border: 1px solid rgba(255,255,255,0.1);" onclick="triggerDayUpload(${i})">Upload</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    window.triggerDayUpload = function(dayNum) {
+      targetUploadDay = `day-${dayNum}`;
+      document.getElementById('global-video-upload').click();
+    };
+
+    document.getElementById('global-video-upload').addEventListener('change', async (e) => {
       const file = e.target.files[0];
-      if (!file || !googleAccessToken) return;
+      if (!file || !targetUploadDay) return;
 
-      alert("Encrypting video to Vault...");
-      const metadata = {
-        name: file.name,
-        parents: ['appDataFolder'] 
-      };
+      if (!googleAccessToken) {
+        alert("Google token expired. Please re-login via System Uplink.");
+        return;
+      }
 
+      showToast(`Uploading video for ${targetUploadDay.toUpperCase()}...`);
       const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('metadata', new Blob([JSON.stringify({ name: `${targetUploadDay}_vault.mp4`, parents: ['appDataFolder'] })], { type: 'application/json' }));
       form.append('file', file);
 
       try {
@@ -263,42 +401,52 @@
           headers: { 'Authorization': 'Bearer ' + googleAccessToken },
           body: form
         });
-        const data = await res.json();
         
-        await setDoc(doc(db, "users", currentUser.uid), { interventionVideoId: data.id }, { merge: true });
-        alert("Upload Complete. File locked in Drive appDataFolder.");
+        if(res.status === 401) {
+          alert("Session token expired. Tap 'System Uplink' to refresh access.");
+          return;
+        }
+
+        const data = await res.json();
+        dayVideos[targetUploadDay] = data.id;
+        await saveUserDataToCloud();
+        showToast(`${targetUploadDay.toUpperCase()} video securely locked in vault!`);
+        buildChronologicalVaultUI();
       } catch (err) {
-        console.error(err);
         alert("Upload failed.");
       }
     });
 
-    async function streamVideo(fileId) {
+    window.streamVideo = async function(fileId) {
       document.getElementById('video-overlay').hidden = false;
       const player = document.getElementById('player');
-      const audio = document.getElementById('bg-audio');
       
-      audio.volume = 1.0;
-      audio.play();
-
       try {
         const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
           headers: { 'Authorization': 'Bearer ' + googleAccessToken }
         });
         
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        player.src = url;
-        player.play();
+        const rawBlob = await res.blob();
+        const videoBlob = new Blob([rawBlob], { type: 'video/mp4' });
+        
+        // Revoke any previous object URL to prevent memory leaks on mobile
+        if(player.src) URL.revokeObjectURL(player.src);
+
+        player.src = URL.createObjectURL(videoBlob);
+        player.play().catch(e => console.log("Playback error:", e));
       } catch (err) {
-        console.error("Streaming failed", err);
+        alert("Streaming failed.");
       }
     }
 
     window.closeVideo = function() {
+      const player = document.getElementById('player');
       document.getElementById('video-overlay').hidden = true;
-      document.getElementById('player').pause();
-      document.getElementById('bg-audio').pause();
+      player.pause();
+      if(player.src) {
+        URL.revokeObjectURL(player.src); // MEMORY LEAK PATCH
+        player.src = '';
+      }
     }
 
     const micBtn = document.getElementById('btn-mic');
@@ -309,48 +457,30 @@
       recognition.continuous = false;
       recognition.lang = 'en-US';
 
-        micBtn.addEventListener('click', () => {
-        // --- BROWSER AUDIO UNLOCK HACK ---
-        const audio = document.getElementById('bg-audio');
-        audio.play().then(() => {
-          audio.pause();
-          audio.currentTime = 0;
-        }).catch(err => console.log("Audio waiting for user gesture..."));
-        // ----------------------------------
-
+      micBtn.addEventListener('click', () => {
         micBtn.classList.add('recording');
-        micBtn.innerText = "Listening...";
+        showToast("Listening for cravings & food intent...");
         recognition.start();
       });
-      
 
       recognition.onresult = async (event) => {
         micBtn.classList.remove('recording');
-        micBtn.innerText = "🎙️ Voice Trigger";
-        
         const transcript = event.results[0][0].transcript.toLowerCase();
+        showToast(`Heard: "${transcript}"`);
         
         const triggers = ['pizza', 'mcdonald', 'burger', 'chocolate', 'cake', 'give up', 'quit'];
-        const needsIntervention = triggers.some(word => transcript.includes(word));
-
-        if (needsIntervention) {
-          const docSnap = await getDoc(doc(db, "users", currentUser.uid));
-          if (docSnap.exists() && docSnap.data().interventionVideoId) {
-            streamVideo(docSnap.data().interventionVideoId);
+        if (triggers.some(word => transcript.includes(word))) {
+          const firstAvailableVideo = Object.values(dayVideos)[0];
+          if (firstAvailableVideo) {
+            streamVideo(firstAvailableVideo);
           } else {
-            alert("No intervention video uploaded yet! Tap the + button to lock one in.");
+            showToast("Craving detected! Please upload at least one video in your Chronicle Vault.");
           }
         }
       };
       
-      recognition.onerror = () => {
-        micBtn.classList.remove('recording');
-        micBtn.innerText = "🎙️ Voice Trigger";
-      }
-    } else {
-      micBtn.innerText = "Speech API Not Supported";
+      recognition.onerror = () => { micBtn.classList.remove('recording'); };
     }
   </script>
 </body>
 </html>
-
