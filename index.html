@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>The Just Do It Vault</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-void: #07080A; 
+    --bg-panel: #131519; 
+    --bg-panel-raised: #1e2128;
+    --accent-orange: #FF5E00;
+    --accent-orange-dim: rgba(255, 94, 0, 0.15);
+    --text-primary: #F2F4F7; 
+    --text-dim: #7C838F;
+    --font-display: 'Rajdhani', sans-serif; 
+    --font-body: 'Inter', sans-serif;
+  }
+  
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+  body { background: var(--bg-void); color: var(--text-primary); font-family: var(--font-body); overflow-x: hidden; }
+  [hidden] { display: none !important; }
+
+  /* --- LOCK SCREEN --- */
+  #lock-screen {
+    position: fixed; inset: 0; z-index: 200; background: var(--bg-void); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 24px; text-align: center;
+  }
+  .vault-title { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; }
+  .vault-sub { font-size: 14px; color: var(--text-dim); margin-bottom: 40px; }
+  .btn-primary {
+    background: var(--accent-orange); color: #fff; border: none; padding: 16px 32px; border-radius: 12px;
+    font-family: var(--font-body); font-weight: 600; font-size: 16px; cursor: pointer;
+    box-shadow: 0 8px 24px var(--accent-orange-dim); transition: transform 0.2s; width: 100%; max-width: 300px;
+  }
+  .btn-primary:active { transform: scale(0.96); }
+
+  /* --- MAIN DASHBOARD --- */
+  #dashboard { padding: 24px 20px; padding-bottom: 100px; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .day-tracker { font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+  .day-sub { color: var(--text-dim); font-size: 13px; font-weight: 500; }
+  
+  /* Stats Grid */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+  .stat-card {
+    background: var(--bg-panel); border-radius: 16px; padding: 16px; display: flex; flex-direction: column;
+    border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden;
+  }
+  .stat-card.overall { background: var(--accent-orange); border: none; color: #fff; }
+  .stat-card.overall .stat-val { color: #fff; }
+  .stat-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; opacity: 0.8; }
+  .stat-val { font-size: 24px; font-weight: 700; font-family: var(--font-display); color: var(--text-primary); }
+  .stat-trend { font-size: 11px; color: var(--accent-orange); font-weight: 700; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-left: 6px; }
+  .stat-card.overall .stat-trend { color: var(--accent-orange); background: #fff; }
+
+  /* Habit Cards */
+  .section-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; gap: 12px; }
+  .habit-list { display: flex; flex-direction: column; gap: 16px; }
+  .habit-card {
+    position: relative; height: 140px; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 16px;
+    box-shadow: inset 0 -60px 50px -10px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.2s;
+  }
+  .habit-card:active { transform: scale(0.98); }
+  .habit-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: -1; opacity: 0.6; }
+  .habit-header { display: flex; align-items: center; gap: 12px; }
+  .habit-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .habit-name { font-weight: 600; font-size: 16px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .habit-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+  .habit-meta { display: flex; gap: 16px; font-size: 12px; font-weight: 500; }
+  .meta-item { display: flex; align-items: center; gap: 4px; }
+  
+  /* Controls */
+  .floating-controls { position: fixed; bottom: 24px; left: 24px; right: 24px; display: flex; gap: 12px; z-index: 100; }
+  .btn-mic { flex: 1; background: var(--bg-panel-raised); border: 1px solid rgba(255,94,0,0.3); color: var(--accent-orange); padding: 16px; border-radius: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-mic.recording { background: var(--accent-orange); color: #fff; animation: pulse 1s infinite; }
+  .btn-vault { width: 60px; height: 60px; background: var(--bg-panel-raised); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 1px solid rgba(255,255,255,0.1); }
+
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+  /* Video Player */
+  #video-overlay { position: fixed; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  video { width: 100%; max-height: 80vh; object-fit: contain; }
+  .close-video { position: absolute; top: 40px; right: 20px; color: #fff; font-size: 16px; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; border: none; font-weight: bold; }
+</style>
+</head>
+<body>
+
+  <div id="lock-screen">
+    <div class="vault-title">The Vault</div>
+    <div class="vault-sub">बहनचोद कायी हो जाएगा, करो.</div>
+    <button class="btn-primary" id="btn-login">SYSTEM UPLINK (LOGIN)</button>
+  </div>
+
+  <div id="dashboard" hidden>
+    <div class="header">
+      <div>
+        <div class="day-tracker">Day 1/40</div>
+        <div class="day-sub" id="user-greeting">Welcome back, Husain.</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card overall">
+        <div class="stat-title">✦ Overall XP</div>
+        <div class="stat-val" id="xp-val">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">🛡️ Discipline</div>
+        <div class="stat-val">Level 1 <span class="stat-trend">+0</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">🎯 Focus</div>
+        <div class="stat-val">Level 1 <span class="stat-trend">+0</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">⚡ Strength</div>
+        <div class="stat-val">Level 1 <span class="stat-trend">+0</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <span style="color:var(--text-primary)">To-dos</span>
+      <span style="color:var(--text-dim)">Done</span>
+    </div>
+    
+    <div class="habit-list">
+      <div class="habit-card" onclick="completeHabit(50)">
+        <div class="habit-bg" style="background-image: url('https://images.unsplash.com/photo-1470071131384-001b85755b36?auto=format&fit=crop&w=600&q=80');"></div>
+        <div class="habit-header">
+          <div class="habit-icon">🌅</div>
+          <div>
+            <div class="habit-name">Wake up at 5 AM</div>
+            <div class="habit-sub">Rise before everyone, seize the day.</div>
+          </div>
+        </div>
+        <div class="habit-meta">
+          <div class="meta-item">🔥 1 Day</div>
+          <div class="meta-item">⭐ ⭐ ⭐</div>
+        </div>
+      </div>
+
+      <div class="habit-card" onclick="completeHabit(30)">
+        <div class="habit-bg" style="background-image: url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=600&q=80');"></div>
+        <div class="habit-header">
+          <div class="habit-icon">💻</div>
+          <div>
+            <div class="habit-name">Deep Work Protocol</div>
+            <div class="habit-sub">1% Upgrade. Build the future board.</div>
+          </div>
+        </div>
+        <div class="habit-meta">
+          <div class="meta-item">🔥 1 Day</div>
+          <div class="meta-item">⭐ ⭐ ⭐ ⭐</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="floating-controls">
+      <button class="btn-mic" id="btn-mic">🎙️ Voice Trigger</button>
+      <button class="btn-vault" id="btn-upload">➕</button>
+      <input type="file" id="video-upload" accept="video/mp4" hidden>
+    </div>
+  </div>
+
+  <div id="video-overlay" hidden>
+    <button class="close-video" onclick="closeVideo()">CLOSE</button>
+    <video id="player" controls playsinline></video>
+  </div>
+  
+  <audio id="bg-audio" src="onelife.mp3"></audio>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAu4_pENf_CO_tqkk8FDiQ5atQi0-NlzyM",
+      authDomain: "life-reset-91b0f.firebaseapp.com",
+      projectId: "life-reset-91b0f",
+      storageBucket: "life-reset-91b0f.firebasestorage.app",
+      messagingSenderId: "581436413169",
+      appId: "1:581436413169:web:d409ac80eaf18ee3cd4550"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    let googleAccessToken = null;
+    let currentUser = null;
+    let totalXP = 0;
+
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      provider.addScope('https://www.googleapis.com/auth/drive.appdata');
+      
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        googleAccessToken = credential.accessToken;
+        currentUser = result.user;
+        
+        document.getElementById('lock-screen').hidden = true;
+        document.getElementById('dashboard').hidden = false;
+        
+        loadUserData();
+      } catch (error) {
+        console.error("Login Failed:", error);
+        alert("System Uplink Failed.");
+      }
+    });
+
+    async function loadUserData() {
+      const userRef = doc(db, "users", currentUser.uid);
+      const docSnap = await getDoc(userRef);
+      if (docSnap.exists()) {
+        totalXP = docSnap.data().xp || 0;
+      } else {
+        await setDoc(userRef, { xp: 0, level: 1 });
+      }
+      document.getElementById('xp-val').innerText = totalXP;
+    }
+
+    window.completeHabit = async function(xpGained) {
+      if(!currentUser) return;
+      totalXP += xpGained;
+      document.getElementById('xp-val').innerText = totalXP;
+      
+      document.getElementById('xp-val').style.color = '#fff';
+      setTimeout(() => document.getElementById('xp-val').style.color = '', 300);
+      
+      await setDoc(doc(db, "users", currentUser.uid), { xp: totalXP }, { merge: true });
+    };
+
+    document.getElementById('btn-upload').addEventListener('click', () => {
+      document.getElementById('video-upload').click();
+    });
+
+    document.getElementById('video-upload').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file || !googleAccessToken) return;
+
+      alert("Encrypting video to Vault...");
+      const metadata = {
+        name: file.name,
+        parents: ['appDataFolder'] 
+      };
+
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', file);
+
+      try {
+        const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + googleAccessToken },
+          body: form
+        });
+        const data = await res.json();
+        
+        await setDoc(doc(db, "users", currentUser.uid), { interventionVideoId: data.id }, { merge: true });
+        alert("Upload Complete. File locked in Drive appDataFolder.");
+      } catch (err) {
+        console.error(err);
+        alert("Upload failed.");
+      }
+    });
+
+    async function streamVideo(fileId) {
+      document.getElementById('video-overlay').hidden = false;
+      const player = document.getElementById('player');
+      const audio = document.getElementById('bg-audio');
+      
+      audio.volume = 1.0;
+      audio.play();
+
+      try {
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+          headers: { 'Authorization': 'Bearer ' + googleAccessToken }
+        });
+        
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        player.src = url;
+        player.play();
+      } catch (err) {
+        console.error("Streaming failed", err);
+      }
+    }
+
+    window.closeVideo = function() {
+      document.getElementById('video-overlay').hidden = true;
+      document.getElementById('player').pause();
+      document.getElementById('bg-audio').pause();
+    }
+
+    const micBtn = document.getElementById('btn-mic');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'en-US';
+
+      micBtn.addEventListener('click', () => {
+        micBtn.classList.add('recording');
+        micBtn.innerText = "Listening...";
+        recognition.start();
+      });
+
+      recognition.onresult = async (event) => {
+        micBtn.classList.remove('recording');
+        micBtn.innerText = "🎙️ Voice Trigger";
+        
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        
+        const triggers = ['pizza', 'mcdonald', 'burger', 'chocolate', 'cake', 'give up', 'quit'];
+        const needsIntervention = triggers.some(word => transcript.includes(word));
+
+        if (needsIntervention) {
+          const docSnap = await getDoc(doc(db, "users", currentUser.uid));
+          if (docSnap.exists() && docSnap.data().interventionVideoId) {
+            streamVideo(docSnap.data().interventionVideoId);
+          } else {
+            alert("No intervention video uploaded yet! Tap the + button to lock one in.");
+          }
+        }
+      };
+      
+      recognition.onerror = () => {
+        micBtn.classList.remove('recording');
+        micBtn.innerText = "🎙️ Voice Trigger";
+      }
+    } else {
+      micBtn.innerText = "Speech API Not Supported";
+    }
+  </script>
+</body>
+</html>
+
