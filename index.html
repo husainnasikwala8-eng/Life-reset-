@@ -21,7 +21,7 @@
   .splash-text { font-family: var(--font-display); font-size: 60px; font-weight: 700; color: #fff; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   
   #unlock-firewall { position: fixed; inset: 0; background: rgba(7,8,10,0.95); backdrop-filter: blur(15px); z-index: 9000; display: flex; flex-direction: column; padding: 30px 20px; justify-content: center; }
-  .firewall-quote { font-size: 18px; line-height: 1.6; font-style: italic; color: #fff; margin-bottom: 20px; border-left: 3px solid var(--accent-orange); padding-left: 16px; }
+  .firewall-quote { font-size: 16px; line-height: 1.6; color: #fff; margin-bottom: 20px; border-left: 3px solid var(--accent-orange); padding-left: 16px; font-weight: 500; }
   .firewall-input { width: 100%; background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 16px; color: #fff; font-family: var(--font-body); resize: none; margin-bottom: 20px; outline: none; }
   .firewall-input:focus { border-color: var(--accent-orange); }
 
@@ -59,11 +59,12 @@
   input[type=range] { flex: 1; accent-color: var(--accent-orange); }
 
   .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-  .media-thumbnail { background: rgba(255,255,255,0.05); height: 140px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; position: relative; }
-  .play-badge { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 30px; opacity: 0; transition: opacity 0.2s; }
-  .media-thumbnail:hover .play-badge { opacity: 1; }
+  .media-thumbnail { background: rgba(255,255,255,0.05); height: 140px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; position: relative; padding: 8px; text-align: center; }
 
-  /* DYNAMIC VISION BOARD STYLES */
+  /* ARCHIVE MODAL STYLES */
+  #archive-modal { position: fixed; inset: 0; background: rgba(7,8,10,0.98); z-index: 9500; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+  .modal-content { background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-top: 40px; margin-bottom: 80px; }
+
   .vision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .vision-card { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
   .vision-card.span-2 { grid-column: span 2; height: 160px; }
@@ -73,7 +74,6 @@
   .vision-edit { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; backdrop-filter: blur(4px); }
   .vision-label { position: relative; z-index: 2; background: transparent; border: none; color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 18px; text-align: center; text-shadow: 0 2px 8px #000; outline: none; width: 100%; letter-spacing: 1px; }
   .vision-label::placeholder { color: rgba(255,255,255,0.6); }
-  .vision-label:focus { background: rgba(0,0,0,0.5); border-radius: 8px; padding: 4px; }
 
   .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: rgba(19, 21, 25, 0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 200; padding: 0 20px; padding-bottom: env(safe-area-inset-bottom); }
   .nav-item { background: none; border: none; color: var(--text-dim); font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-transform: uppercase; }
@@ -98,9 +98,9 @@
 
   <!-- READ TO UNLOCK FIREWALL -->
   <div id="unlock-firewall" hidden>
-    <div style="font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent-orange); margin-bottom: 20px;">Autopilot Check.</div>
-    <div class="firewall-quote" id="firewall-quote">Loading puzzle...</div>
-    <textarea id="firewall-input" class="firewall-input" rows="3" placeholder="Solve it. Type the answer to unlock..."></textarea>
+    <div style="font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent-orange); margin-bottom: 20px;">The Protocol.</div>
+    <div class="firewall-quote" id="firewall-quote">Loading curriculum...</div>
+    <textarea id="firewall-input" class="firewall-input" rows="3" placeholder="Distill this. What is the core execution step today?"></textarea>
     <button class="btn-primary" id="btn-unlock-app">Commit & Unlock</button>
   </div>
 
@@ -149,7 +149,7 @@
     </div>
 
     <div class="core-card">
-      <div class="core-title">3. Media Discipline <span>Zero Anime</span></div>
+      <div class="core-title">3. Media Discipline <span>Zero Brainrot</span></div>
       <select id="media-select" class="time-input">
         <option value="pending">Status...</option>
         <option value="perfect">Clean (No short content)</option>
@@ -216,34 +216,40 @@
       </div>
     </div>
     <div class="vision-grid">
-      <!-- Pillar 1 -->
       <div class="vision-card span-2">
         <div class="vision-bg" id="vision-bg-spiritual"></div>
         <button class="vision-edit" onclick="document.getElementById('vision-file-spiritual').click()">📷</button>
         <input type="file" id="vision-file-spiritual" accept="image/*" hidden>
         <input type="text" class="vision-label" id="vision-text-spiritual" placeholder="Spiritual & Quran" style="font-size: 24px;">
       </div>
-      <!-- Pillar 2 -->
       <div class="vision-card span-1">
         <div class="vision-bg" id="vision-bg-fitness"></div>
         <button class="vision-edit" onclick="document.getElementById('vision-file-fitness').click()">📷</button>
         <input type="file" id="vision-file-fitness" accept="image/*" hidden>
         <input type="text" class="vision-label" id="vision-text-fitness" placeholder="Elite Fitness">
       </div>
-      <!-- Pillar 3 -->
       <div class="vision-card span-1">
         <div class="vision-bg" id="vision-bg-partnership"></div>
         <button class="vision-edit" onclick="document.getElementById('vision-file-partnership').click()">📷</button>
         <input type="file" id="vision-file-partnership" accept="image/*" hidden>
         <input type="text" class="vision-label" id="vision-text-partnership" placeholder="The Partnership">
       </div>
-      <!-- Pillar 4 -->
       <div class="vision-card span-2">
         <div class="vision-bg" id="vision-bg-craft"></div>
         <button class="vision-edit" onclick="document.getElementById('vision-file-craft').click()">📷</button>
         <input type="file" id="vision-file-craft" accept="image/*" hidden>
         <input type="text" class="vision-label" id="vision-text-craft" placeholder="HN Visuals & Craft" style="font-size: 24px;">
       </div>
+    </div>
+  </div>
+
+  <!-- ARCHIVE READER MODAL -->
+  <div id="archive-modal" hidden>
+    <div class="modal-content">
+      <button class="btn-secondary" id="btn-close-modal" style="margin-bottom: 20px; width: auto; padding: 10px 16px;">← Back to Vault</button>
+      <div id="modal-date" style="font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent-orange);"></div>
+      <div id="modal-text" style="margin-top: 15px; font-size: 15px; line-height: 1.6; white-space: pre-wrap; color: #fff;"></div>
+      <button class="btn-primary" id="btn-play-modal-vid" style="margin-top: 30px;" hidden>▶️ Stream Vault Video</button>
     </div>
   </div>
 
@@ -267,7 +273,7 @@
   <audio id="ambient-audio" src="onelife.mp4" loop preload="auto"></audio>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -286,7 +292,7 @@
     
     let googleAccessToken = null;
     let currentUser = null;
-    let userData = { xp: 0, streak: 0, history: {}, vision: {} };
+    let userData = { xp: 0, streak: 0, history: {}, vision: {}, bookIndex: 0 };
     let pendingVideo = null;
     let emergencyVideoId = null; 
     let isAmbientPlaying = false;
@@ -294,16 +300,19 @@
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('dashboard-date').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-    // --- STRICT AUTOPILOT SNAP ENGINE (Must get the answer right) ---
-    const autopilotSnaps = [
-      { q: "RIDDLE: I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?", a: ["echo"] },
-      { q: "LATERAL THINKING: A man pushes his car to a hotel and immediately goes bankrupt. What game is he playing?", a: ["monopoly"] },
-      { q: "TRICK QUESTION: You are running a race and pass the person in 2nd place. What place are you in?", a: ["2nd", "second"] },
-      { q: "RIDDLE: The more you take, the more you leave behind. What are they?", a: ["footstep", "step", "steps"] },
-      { q: "RIDDLE: I have keys but no doors, space but no room. You can enter but not go outside. What am I?", a: ["keyboard"] }
+    // --- THE PERSONALIZED NASHIK PROTOCOL ---
+    const customCurriculum = [
+      "The world thinks you need a massive studio. You just need discipline and Wi-Fi. But you cannot edit a cinematic sequence if your dopamine is fried by short-form scrolling. Create, do not consume.",
+      "Assisting with digital price lists and video ads at the family hardware business isn't a chore—it is your training ground. Learn B2B sales in the physical world, and your digital agency will be unstoppable.",
+      "A Porsche and a daypack for travel mean nothing if you miss Fajr. Your 5 daily prayers are the ultimate shutdown sequence for your soul. Anchor the spiritual baseline first.",
+      "True brotherhood means elevating each other. Are your conversations about the future, or just noise? Surround yourself with builders. Iron sharpens iron.",
+      "You fought a bank over a frozen account and stood up to a scammer. That is leverage. Use that same aggressive defense to protect your time from digital brainrot.",
+      "Preparing for a partnership is not just about financial stability through freelance clients. It is about physical calibration. The 30 minutes of exercise is how you build a frame capable of carrying a family.",
+      "The Vision Board has four pillars. Neglect one, and the structure collapses. You cannot trade Quran for code, or fitness for freelance gigs. Complete the checklist.",
+      "Fast-food cravings are a glitch in the software. When the urge hits, do not negotiate. Hit the emergency button. Watch the vault video. Break the loop.",
+      "Your brand, HN Visuals, requires focus that a mobile device inherently fights against. Every notification is a tax on your creative bandwidth. Turn them off.",
+      "You are building a compounding machine. Today's work does not pay off tomorrow. It pays off in two years. Patience with results, impatience with actions."
     ];
-
-    let currentPuzzleIndex = 0;
 
     function runSplashAndFirewall() {
       document.getElementById('splash-streak').innerText = `DAY ${userData.streak || 0}`;
@@ -311,9 +320,9 @@
         document.getElementById('splash-screen').style.opacity = '0';
         setTimeout(() => {
           document.getElementById('splash-screen').hidden = true;
-          const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-          currentPuzzleIndex = dayOfYear % autopilotSnaps.length;
-          document.getElementById('firewall-quote').innerText = autopilotSnaps[currentPuzzleIndex].q;
+          
+          const displayIndex = (userData.bookIndex || 0) % customCurriculum.length;
+          document.getElementById('firewall-quote').innerText = customCurriculum[displayIndex];
           document.getElementById('unlock-firewall').hidden = false;
         }, 500);
       }, 2000);
@@ -344,27 +353,27 @@
       }
     });
 
-    // --- STRICT ANSWER VALIDATION ---
     document.getElementById('btn-unlock-app').addEventListener('click', () => {
-      const input = document.getElementById('firewall-input').value.toLowerCase().trim();
-      const activePuzzle = autopilotSnaps[currentPuzzleIndex];
+      const input = document.getElementById('firewall-input').value.trim();
       
-      const isCorrect = activePuzzle.a.some(ans => input.includes(ans));
-      
-      if(!isCorrect) {
-        showToast("Incorrect. Think deeper.");
-        return; // Stops the app from unlocking
+      if(input.length < 15) {
+        showToast("Too short. Actually process what you just read.");
+        return;
       }
       
       document.getElementById('unlock-firewall').hidden = true;
+      userData.bookIndex = (userData.bookIndex || 0) + 1;
+      saveToCloud();
       updateUI();
     });
 
+    // --- VISIBLE GOOGLE DRIVE AUTHENTICATION ---
     async function ensureDriveToken() {
       if(!googleAccessToken) {
         try {
           const provider = new GoogleAuthProvider();
-          provider.addScope('https://www.googleapis.com/auth/drive.appdata');
+          // CHANGED TO VISIBLE DRIVE SCOPE
+          provider.addScope('https://www.googleapis.com/auth/drive.file'); 
           const result = await signInWithPopup(auth, provider);
           googleAccessToken = GoogleAuthProvider.credentialFromResult(result).accessToken;
           return true;
@@ -392,37 +401,14 @@
       }
     });
 
-    // --- BRUTE FORCE DATA RECOVERY ---
+    // --- RECOVERY & DATA INIT ---
     async function loadData() {
       try {
         const docSnap = await getDoc(doc(db, "users", currentUser.uid));
-        let recoveredData = false;
-        
         if (docSnap.exists()) {
           userData = docSnap.data();
           if(!userData.history) userData.history = {};
           if(!userData.vision) userData.vision = {};
-        }
-        
-        // This loop aggressively hunts down your old video and notes
-        if (userData.entries) {
-            Object.keys(userData.entries).forEach(oldKey => {
-                const oldData = userData.entries[oldKey];
-                if(oldData.text || oldData.videoId) {
-                    userData.history[`Legacy-${oldKey}`] = {
-                        namaz: [false,false,false,false,false], quran: false, salam: false, media: "pending", sleep: "", exercise: 0, creativity: "",
-                        vidId: oldData.videoId || null,
-                        journalText: oldData.text || ""
-                    };
-                    recoveredData = true;
-                }
-            });
-            delete userData.entries; // Delete old format so it isn't duplicated
-        }
-        
-        if (recoveredData) {
-            await saveToCloud();
-            showToast("Legacy Video & Notes Recovered into Archives.");
         }
         
         if(!userData.history[todayStr]) {
@@ -454,7 +440,6 @@
       showToast("Architecture Synced.");
     });
 
-    // --- XP MATH ---
     function applyCompoundXP(baseXP) {
       const multiplier = Math.pow(1.01, userData.streak || 0);
       userData.xp = (userData.xp || 0) + Math.round(baseXP * multiplier);
@@ -512,7 +497,7 @@
       }
     });
 
-    // --- VISION BOARD UPLOAD PIPELINE ---
+    // --- VISIBLE VISION BOARD PIPELINE ---
     const pillars = ['spiritual', 'fitness', 'partnership', 'craft'];
     
     function loadVisionBoard() {
@@ -543,11 +528,12 @@
         const file = e.target.files[0];
         if(!file) return;
         
-        showToast("Encrypting image to Vault...");
+        showToast("Encrypting image to Visible Vault...");
         if(!(await ensureDriveToken())) { showToast("Drive Auth failed."); return; }
 
         const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify({ name: `vision_${pillar}.jpg`, parents: ['appDataFolder'] })], { type: 'application/json' }));
+        // PARENTS REMOVED: Now saves to main Drive
+        form.append('metadata', new Blob([JSON.stringify({ name: `vision_${pillar}.jpg` })], { type: 'application/json' }));
         form.append('file', file);
 
         try {
@@ -567,7 +553,7 @@
       });
     });
 
-    // --- VAULT PIPELINE ---
+    // --- VISIBLE VAULT PIPELINE ---
     document.getElementById('btn-record-vid').addEventListener('click', () => { document.getElementById('sys-camera').click(); });
 
     document.getElementById('sys-camera').addEventListener('change', (e) => {
@@ -586,7 +572,8 @@
         if (!(await ensureDriveToken())) { showToast("Drive auth failed."); return; }
 
         const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify({ name: `${todayStr}_log.mp4`, parents: ['appDataFolder'] })], { type: 'application/json' }));
+        // PARENTS REMOVED: Now saves to main Drive
+        form.append('metadata', new Blob([JSON.stringify({ name: `LifeReset_Log_${todayStr}.mp4` })], { type: 'application/json' }));
         form.append('file', pendingVideo);
 
         try {
@@ -616,7 +603,7 @@
       else showToast("Record a journal video first to enable emergency backup.");
     });
 
-    // --- UI RENDERER ---
+    // --- UI RENDERER & ARCHIVE MODAL LOGIC ---
     function updateUI() {
       const todayData = userData.history[todayStr] || { namaz: [] };
       const multiplier = Math.pow(1.01, userData.streak || 0).toFixed(2);
@@ -640,8 +627,6 @@
       if(todayData.sleep) document.getElementById('sleep-time').value = todayData.sleep;
       if(todayData.exercise) document.getElementById('exercise-slider').value = todayData.exercise;
       if(todayData.creativity) document.getElementById('creativity-input').value = todayData.creativity;
-      
-      // Load current text into Vault
       if(todayData.journalText) document.getElementById('journal-input').value = todayData.journalText;
       
       buildGallery();
@@ -655,16 +640,38 @@
       Object.keys(userData.history).reverse().forEach(dateKey => {
         const entry = userData.history[dateKey];
         if(entry.vidId || entry.journalText) {
+          const rawText = entry.journalText ? entry.journalText.replace(/'/g, "\\'") : "";
+          const vidParam = entry.vidId ? `'${entry.vidId}'` : `null`;
+          
           gallery.innerHTML += `
-            <div class="media-thumbnail" ${entry.vidId ? `onclick="window.streamVideo('${entry.vidId}')"` : ''}>
-              ${entry.vidId ? '<span style="font-size:30px; margin-bottom: 8px;">📼</span><div class="play-badge">▶️</div>' : '<span style="font-size:30px; margin-bottom: 8px;">📝</span>'}
+            <div class="media-thumbnail" onclick="window.openArchiveModal('${dateKey}', '${rawText}', ${vidParam})">
+              ${entry.vidId ? '<span style="font-size:30px; margin-bottom: 8px;">📼</span>' : '<span style="font-size:30px; margin-bottom: 8px;">📝</span>'}
               <span style="font-size:12px; font-weight:700;">${dateKey.replace('Legacy-', '')}</span>
-              ${entry.journalText ? `<div style="font-size:8px; opacity:0.6; padding:0 4px; text-align:center; margin-top:4px;">${entry.journalText.substring(0, 15)}...</div>` : ''}
+              ${entry.journalText ? `<div style="font-size:8px; opacity:0.6; padding:0 4px; margin-top:4px;">${entry.journalText.substring(0, 15)}...</div>` : ''}
             </div>
           `;
         }
       });
     }
+
+    window.openArchiveModal = function(date, text, vidId) {
+      document.getElementById('modal-date').innerText = date.replace('Legacy-', '');
+      document.getElementById('modal-text').innerText = text || "No text log for this day.";
+      
+      const playBtn = document.getElementById('btn-play-modal-vid');
+      if(vidId) {
+        playBtn.hidden = false;
+        playBtn.onclick = () => { streamVideo(vidId); };
+      } else {
+        playBtn.hidden = true;
+      }
+      
+      document.getElementById('archive-modal').hidden = false;
+    };
+
+    document.getElementById('btn-close-modal').addEventListener('click', () => {
+      document.getElementById('archive-modal').hidden = true;
+    });
 
     window.streamVideo = async function(fileId) {
       if(!(await ensureDriveToken())) { showToast("Auth required for media."); return; }
