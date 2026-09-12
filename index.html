@@ -631,8 +631,7 @@
       
       buildGallery();
     }
-
-    function buildGallery() {
+       function buildGallery() {
       const gallery = document.getElementById('media-gallery');
       if(!gallery) return;
       gallery.innerHTML = '';
@@ -640,11 +639,13 @@
       Object.keys(userData.history).reverse().forEach(dateKey => {
         const entry = userData.history[dateKey];
         if(entry.vidId || entry.journalText) {
-          const rawText = entry.journalText ? entry.journalText.replace(/'/g, "\\'") : "";
+          
+          // BULLETPROOF ENCODING: Prevents line breaks and quotes from crashing the button
+          const safeText = encodeURIComponent(entry.journalText || "");
           const vidParam = entry.vidId ? `'${entry.vidId}'` : `null`;
           
           gallery.innerHTML += `
-            <div class="media-thumbnail" onclick="window.openArchiveModal('${dateKey}', '${rawText}', ${vidParam})">
+            <div class="media-thumbnail" onclick="window.openArchiveModal('${dateKey}', '${safeText}', ${vidParam})">
               ${entry.vidId ? '<span style="font-size:30px; margin-bottom: 8px;">📼</span>' : '<span style="font-size:30px; margin-bottom: 8px;">📝</span>'}
               <span style="font-size:12px; font-weight:700;">${dateKey.replace('Legacy-', '')}</span>
               ${entry.journalText ? `<div style="font-size:8px; opacity:0.6; padding:0 4px; margin-top:4px;">${entry.journalText.substring(0, 15)}...</div>` : ''}
@@ -654,9 +655,12 @@
       });
     }
 
-    window.openArchiveModal = function(date, text, vidId) {
+    window.openArchiveModal = function(date, encodedText, vidId) {
       document.getElementById('modal-date').innerText = date.replace('Legacy-', '');
-      document.getElementById('modal-text').innerText = text || "No text log for this day.";
+      
+      // DECODE THE TEXT: Translates it back into readable paragraphs
+      const decodedText = decodeURIComponent(encodedText);
+      document.getElementById('modal-text').innerText = decodedText || "No text log for this day.";
       
       const playBtn = document.getElementById('btn-play-modal-vid');
       if(vidId) {
@@ -668,8 +672,8 @@
       
       document.getElementById('archive-modal').hidden = false;
     };
-
-    document.getElementById('btn-close-modal').addEventListener('click', () => {
+    
+      document.getElementById('btn-close-modal').addEventListener('click', () => {
       document.getElementById('archive-modal').hidden = true;
     });
 
