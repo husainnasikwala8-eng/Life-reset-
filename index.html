@@ -273,7 +273,7 @@
   <audio id="ambient-audio" src="onelife.mp4" loop preload="auto"></audio>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -727,4 +727,130 @@
     });
 
     document.getElementById('btn-emergency').addEventListener('click', () => {
-      if(emergencyVideoId) stre
+      if(emergencyVideoId) streamVideo(emergencyVideoId);
+      else showToast("Record a journal video first to enable emergency backup.");
+    });
+
+    // --- UI RENDERER & ARCHIVE MODAL LOGIC ---
+    function updateUI() {
+      const todayData = userData.history[currentDateStr] || blankDayEntry();
+      const multiplier = Math.pow(1.01, userData.streak || 0).toFixed(2);
+
+      document.getElementById('compound-multiplier').innerText = `${multiplier}x Compound Leverage`;
+      document.getElementById('xp-val').innerText = `${userData.xp || 0} XP`;
+
+      const namazBtns = document.querySelectorAll('#namaz-group .checkbox-btn');
+      for(let i=0; i<5; i++) {
+        if(todayData.namaz[i]) namazBtns[i].classList.add('active');
+        else namazBtns[i].classList.remove('active');
+      }
+
+      const quranBtn = document.getElementById('quran-btn');
+      if(todayData.quran) quranBtn.classList.add('active'); else quranBtn.classList.remove('active');
+
+      const salamBtn = document.getElementById('salam-btn');
+      if(todayData.salam) salamBtn.classList.add('active'); else salamBtn.classList.remove('active');
+
+      if(todayData.media) document.getElementById('media-select').value = todayData.media;
+      document.getElementById('sleep-time').value = todayData.sleep || '';
+      document.getElementById('exercise-slider').value = todayData.exercise || 0;
+      document.getElementById('creativity-input').value = todayData.creativity || '';
+      document.getElementById('journal-input').value = todayData.journalText || '';
+
+      buildGallery();
+    }
+
+    // FIX: built with real DOM nodes and addEventListener instead of an
+    // inline onclick string — that's what was silently breaking on any
+    // journal entry with a newline, quote, or line break.
+    function buildGallery() {
+      const gallery = document.getElementById('media-gallery');
+      if(!gallery) return;
+      gallery.innerHTML = '';
+
+      Object.keys(userData.history).sort().reverse().forEach(dateKey => {
+        const entry = userData.history[dateKey];
+        if(!entry.vidId && !entry.journalText) return;
+
+        const card = document.createElement('div');
+        card.className = 'media-thumbnail';
+
+        const icon = document.createElement('span');
+        icon.style.fontSize = '30px';
+        icon.style.marginBottom = '8px';
+        icon.textContent = entry.vidId ? '📼' : '📝';
+        card.appendChild(icon);
+
+        const label = document.createElement('span');
+        label.style.fontSize = '12px';
+        label.style.fontWeight = '700';
+        label.textContent = dateKey.replace('Legacy-', '');
+        card.appendChild(label);
+
+        if (entry.journalText) {
+          const preview = document.createElement('div');
+          preview.style.fontSize = '8px';
+          preview.style.opacity = '0.6';
+          preview.style.padding = '0 4px';
+          preview.style.marginTop = '4px';
+          preview.textContent = entry.journalText.substring(0, 15) + '...';
+          card.appendChild(preview);
+        }
+
+        card.addEventListener('click', () => openArchiveModal(dateKey, entry.journalText || '', entry.vidId || null));
+        gallery.appendChild(card);
+      });
+    }
+
+    function openArchiveModal(date, text, vidId) {
+      document.getElementById('modal-date').innerText = date.replace('Legacy-', '');
+      document.getElementById('modal-text').innerText = text || "No text log for this day.";
+
+      const playBtn = document.getElementById('btn-play-modal-vid');
+      if(vidId) {
+        playBtn.hidden = false;
+        playBtn.onclick = () => { streamVideo(vidId); };
+      } else {
+        playBtn.hidden = true;
+      }
+
+      document.getElementById('archive-modal').hidden = false;
+    }
+
+    document.getElementById('btn-close-modal').addEventListener('click', () => {
+      document.getElementById('archive-modal').hidden = true;
+    });
+
+    window.streamVideo = async function(fileId) {
+      if(!(await ensureDriveToken())) { showToast("Auth required for media."); return; }
+
+      document.getElementById('video-overlay').hidden = false;
+      const player = document.getElementById('player');
+      showToast("Decrypting secure video stream...");
+
+      try {
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { 'Authorization': 'Bearer ' + googleAccessToken } });
+        const arrayBuffer = await res.arrayBuffer();
+        const videoBlob = new Blob([arrayBuffer], { type: 'video/mp4' });
+
+        if(player.src) URL.revokeObjectURL(player.src);
+        player.src = URL.createObjectURL(videoBlob);
+        player.muted = false;
+        player.volume = 1.0;
+        player.play().catch(e => showToast("Tap play manually."));
+      } catch (err) { showToast("Stream failed."); }
+    };
+
+    document.getElementById('btn-close-video').addEventListener('click', () => {
+      const player = document.getElementById('player');
+      document.getElementById('video-overlay').hidden = true;
+      player.pause();
+      if(player.src) URL.revokeObjectURL(player.src);
+    });
+
+    async function saveToCloud() {
+      if(currentUser) await setDoc(doc(db, "users", currentUser.uid), userData, { merge: true });
+    }
+  </script>
+</body>
+</html>
