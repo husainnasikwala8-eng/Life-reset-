@@ -273,7 +273,7 @@
   <audio id="ambient-audio" src="onelife.mp4" loop preload="auto"></audio>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+              import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -309,7 +309,123 @@
 
     // FIX: date is now computed on demand, not frozen at script load.
     function getCurrentDateStr() {
-      return new Date().toISOString()document.getElementById('btn-unlock-app').addEventListener('click', () => {
+      return new Date().toISOString().split('T')[0];
+    }
+    let currentDateStr = getCurrentDateStr();
+
+    function updateDateDisplay() {
+      document.getElementById('dashboard-date').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    updateDateDisplay();
+
+    function blankDayEntry() {
+      return { namaz: [false,false,false,false,false], quran: false, salam: false, media: "pending", sleep: "", exercise: 0, creativity: "", vidId: null, journalText: "" };
+    }
+
+    // FIX (fills the streak gap): a day only "counts" if every mandatory item was hit.
+    function dayIsComplete(entry) {
+      if (!entry) return false;
+      const namazDone = Array.isArray(entry.namaz) && entry.namaz.every(Boolean);
+      return !!(namazDone && entry.quran && entry.salam && entry.media === 'perfect' && entry.sleep && Number(entry.exercise) >= 50 && entry.creativity && entry.creativity.length > 3);
+    }
+
+    // FIX: this is the actual midnight-rollover logic that was missing.
+    // Called on load, on tab focus, and on a timer — checks the real date,
+    // and if it moved on, scores yesterday and opens a fresh bucket for today.
+    function ensureTodayEntry() {
+      const freshDate = getCurrentDateStr();
+      if (freshDate === currentDateStr && userData.history[currentDateStr]) return false;
+
+      const previousDate = currentDateStr;
+      const previousEntry = userData.history[previousDate];
+
+      if (previousDate && freshDate !== previousDate) {
+        userData.streak = dayIsComplete(previousEntry) ? (userData.streak || 0) + 1 : 0;
+      }
+
+      currentDateStr = freshDate;
+      if (!userData.history[currentDateStr]) {
+        userData.history[currentDateStr] = blankDayEntry();
+      }
+
+      updateDateDisplay();
+      saveToCloud();
+      return true;
+    }
+
+    // --- THE PERSONALIZED NASHIK PROTOCOL ---
+    const customCurriculum = [
+      "The world thinks you need a massive studio. You just need discipline and Wi-Fi. But you cannot edit a cinematic sequence if your dopamine is fried by short-form scrolling. Create, do not consume.",
+      "Assisting with digital price lists and video ads at the family hardware business isn't a chore—it is your training ground. Learn B2B sales in the physical world, and your digital agency will be unstoppable.",
+      "A Porsche and a daypack for travel mean nothing if you miss Fajr. Your 5 daily prayers are the ultimate shutdown sequence for your soul. Anchor the spiritual baseline first.",
+      "True brotherhood means elevating each other. Are your conversations about the future, or just noise? Surround yourself with builders. Iron sharpens iron.",
+      "You fought a bank over a frozen account and stood up to a scammer. That is leverage. Use that same aggressive defense to protect your time from digital brainrot.",
+      "Preparing for a partnership is not just about financial stability through freelance clients. It is about physical calibration. The 30 minutes of exercise is how you build a frame capable of carrying a family.",
+      "The Vision Board has four pillars. Neglect one, and the structure collapses. You cannot trade Quran for code, or fitness for freelance gigs. Complete the checklist.",
+      "Fast-food cravings are a glitch in the software. When the urge hits, do not negotiate. Hit the emergency button. Watch the vault video. Break the loop.",
+      "Your brand, HN Visuals, requires focus that a mobile device inherently fights against. Every notification is a tax on your creative bandwidth. Turn them off.",
+      "You are building a compounding machine. Today's work does not pay off tomorrow. It pays off in two years. Patience with results, impatience with actions."
+    ];
+
+    // FIX (the "quotes are limited" complaint): shuffle instead of a hard
+    // sequential cycle, so you don't get the identical order every 10 opens.
+    // Note: the pool is still 10 lines — add more to customCurriculum above
+    // whenever you want it to feel less repetitive.
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function getNextQuote() {
+      if (!userData.quoteQueue || userData.quoteQueue.length === 0) {
+        userData.quoteQueue = shuffle(customCurriculum.map((_, i) => i));
+      }
+      const nextIndex = userData.quoteQueue.shift();
+      saveToCloud();
+      return customCurriculum[nextIndex];
+    }
+
+    function runSplashAndFirewall() {
+      document.getElementById('splash-streak').innerText = `DAY ${userData.streak || 0}`;
+      setTimeout(() => {
+        document.getElementById('splash-screen').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('splash-screen').hidden = true;
+          document.getElementById('firewall-quote').innerText = getNextQuote();
+          document.getElementById('unlock-firewall').hidden = false;
+        }, 500);
+      }, 2000);
+    }
+
+    const toast = document.getElementById('status-toast');
+    function showToast(text) {
+      toast.innerText = text;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    document.getElementById('audio-toggle-btn').addEventListener('click', () => {
+      const audio = document.getElementById('ambient-audio');
+      const btn = document.getElementById('audio-toggle-btn');
+      if (isAmbientPlaying) {
+        audio.pause();
+        btn.innerText = "🔇 Ambient: OFF";
+        btn.classList.remove('playing');
+        isAmbientPlaying = false;
+      } else {
+        audio.volume = 0.5;
+        audio.play().then(() => {
+          btn.innerText = "🔊 Ambient: ON";
+          btn.classList.add('playing');
+          isAmbientPlaying = true;
+        }).catch(err => showToast("Audio locked. Tap screen first."));
+      }
+    });
+
+    document.getElementById('btn-unlock-app').addEventListener('click', () => {
       const input = document.getElementById('firewall-input').value.trim();
 
       if(input.length < 15) {
@@ -384,6 +500,16 @@
       } catch (e) { return null; }
     }
 
+    // Only ever called from an actual tap (file picked, video saved) —
+    // never automatically on load, so the popup this can trigger never
+    // gets blocked or left hanging.
+    async function ensureAppFolder() {
+      if (!appFolderId) {
+        appFolderId = await getOrCreateAppFolder();
+      }
+      return appFolderId;
+    }
+
     // --- RECOVERY & DATA INIT ---
     async function loadData() {
       try {
@@ -393,10 +519,6 @@
           if(!userData.history) userData.history = {};
           if(!userData.vision) userData.vision = {};
           if(!userData.quoteQueue) userData.quoteQueue = [];
-        }
-
-        if (await ensureDriveToken()) {
-          appFolderId = await getOrCreateAppFolder();
         }
 
         currentDateStr = getCurrentDateStr();
@@ -532,6 +654,7 @@
 
         showToast("Encrypting image to Visible Vault...");
         if(!(await ensureDriveToken())) { showToast("Drive Auth failed."); return; }
+        await ensureAppFolder();
 
         const form = new FormData();
         const visionMeta = { name: `vision_${pillar}.jpg` };
@@ -573,6 +696,7 @@
 
       if (pendingVideo) {
         if (!(await ensureDriveToken())) { showToast("Drive auth failed."); return; }
+        await ensureAppFolder();
 
         const form = new FormData();
         const videoMeta = { name: `LifeReset_Log_${currentDateStr}.mp4` };
@@ -603,130 +727,4 @@
     });
 
     document.getElementById('btn-emergency').addEventListener('click', () => {
-      if(emergencyVideoId) streamVideo(emergencyVideoId);
-      else showToast("Record a journal video first to enable emergency backup.");
-    });
-
-    // --- UI RENDERER & ARCHIVE MODAL LOGIC ---
-    function updateUI() {
-      const todayData = userData.history[currentDateStr] || blankDayEntry();
-      const multiplier = Math.pow(1.01, userData.streak || 0).toFixed(2);
-
-      document.getElementById('compound-multiplier').innerText = `${multiplier}x Compound Leverage`;
-      document.getElementById('xp-val').innerText = `${userData.xp || 0} XP`;
-
-      const namazBtns = document.querySelectorAll('#namaz-group .checkbox-btn');
-      for(let i=0; i<5; i++) {
-        if(todayData.namaz[i]) namazBtns[i].classList.add('active');
-        else namazBtns[i].classList.remove('active');
-      }
-
-      const quranBtn = document.getElementById('quran-btn');
-      if(todayData.quran) quranBtn.classList.add('active'); else quranBtn.classList.remove('active');
-
-      const salamBtn = document.getElementById('salam-btn');
-      if(todayData.salam) salamBtn.classList.add('active'); else salamBtn.classList.remove('active');
-
-      if(todayData.media) document.getElementById('media-select').value = todayData.media;
-      document.getElementById('sleep-time').value = todayData.sleep || '';
-      document.getElementById('exercise-slider').value = todayData.exercise || 0;
-      document.getElementById('creativity-input').value = todayData.creativity || '';
-      document.getElementById('journal-input').value = todayData.journalText || '';
-
-      buildGallery();
-    }
-
-    // FIX: built with real DOM nodes and addEventListener instead of an
-    // inline onclick string — that's what was silently breaking on any
-    // journal entry with a newline, quote, or line break.
-    function buildGallery() {
-      const gallery = document.getElementById('media-gallery');
-      if(!gallery) return;
-      gallery.innerHTML = '';
-
-      Object.keys(userData.history).sort().reverse().forEach(dateKey => {
-        const entry = userData.history[dateKey];
-        if(!entry.vidId && !entry.journalText) return;
-
-        const card = document.createElement('div');
-        card.className = 'media-thumbnail';
-
-        const icon = document.createElement('span');
-        icon.style.fontSize = '30px';
-        icon.style.marginBottom = '8px';
-        icon.textContent = entry.vidId ? '📼' : '📝';
-        card.appendChild(icon);
-
-        const label = document.createElement('span');
-        label.style.fontSize = '12px';
-        label.style.fontWeight = '700';
-        label.textContent = dateKey.replace('Legacy-', '');
-        card.appendChild(label);
-
-        if (entry.journalText) {
-          const preview = document.createElement('div');
-          preview.style.fontSize = '8px';
-          preview.style.opacity = '0.6';
-          preview.style.padding = '0 4px';
-          preview.style.marginTop = '4px';
-          preview.textContent = entry.journalText.substring(0, 15) + '...';
-          card.appendChild(preview);
-        }
-
-        card.addEventListener('click', () => openArchiveModal(dateKey, entry.journalText || '', entry.vidId || null));
-        gallery.appendChild(card);
-      });
-    }
-
-    function openArchiveModal(date, text, vidId) {
-      document.getElementById('modal-date').innerText = date.replace('Legacy-', '');
-      document.getElementById('modal-text').innerText = text || "No text log for this day.";
-
-      const playBtn = document.getElementById('btn-play-modal-vid');
-      if(vidId) {
-        playBtn.hidden = false;
-        playBtn.onclick = () => { streamVideo(vidId); };
-      } else {
-        playBtn.hidden = true;
-      }
-
-      document.getElementById('archive-modal').hidden = false;
-    }
-
-    document.getElementById('btn-close-modal').addEventListener('click', () => {
-      document.getElementById('archive-modal').hidden = true;
-    });
-
-    window.streamVideo = async function(fileId) {
-      if(!(await ensureDriveToken())) { showToast("Auth required for media."); return; }
-
-      document.getElementById('video-overlay').hidden = false;
-      const player = document.getElementById('player');
-      showToast("Decrypting secure video stream...");
-
-      try {
-        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { 'Authorization': 'Bearer ' + googleAccessToken } });
-        const arrayBuffer = await res.arrayBuffer();
-        const videoBlob = new Blob([arrayBuffer], { type: 'video/mp4' });
-
-        if(player.src) URL.revokeObjectURL(player.src);
-        player.src = URL.createObjectURL(videoBlob);
-        player.muted = false;
-        player.volume = 1.0;
-        player.play().catch(e => showToast("Tap play manually."));
-      } catch (err) { showToast("Stream failed."); }
-    };
-
-    document.getElementById('btn-close-video').addEventListener('click', () => {
-      const player = document.getElementById('player');
-      document.getElementById('video-overlay').hidden = true;
-      player.pause();
-      if(player.src) URL.revokeObjectURL(player.src);
-    });
-
-    async function saveToCloud() {
-      if(currentUser) await setDoc(doc(db, "users", currentUser.uid), userData, { merge: true });
-    }
-  </script>
-</body>
-</html>
+      if(emergencyVideoId) stre
