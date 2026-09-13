@@ -273,7 +273,7 @@
   <audio id="ambient-audio" src="onelife.mp4" loop preload="auto"></audio>
 
   <script type="module">
-         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -289,81 +289,35 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    
+
+    // Media (video journal + vision images) still lives in Drive, in one
+    // dedicated folder rather than loose in Drive root. Habit data, XP, and
+    // streak stay in Firestore, where frequent small writes belong.
+    const ALLOWED_EMAIL = "husainnasikwala8@gmail.com";
+    function isAllowedUser(user) {
+      return !!(user && user.email && user.email.toLowerCase() === ALLOWED_EMAIL);
+    }
+    const APP_FOLDER_NAME = "Life Reset OS";
+    let appFolderId = null;
+
     let googleAccessToken = null;
     let currentUser = null;
-    let userData = { xp: 0, streak: 0, history: {}, vision: {}, bookIndex: 0 };
+    let userData = { xp: 0, streak: 0, history: {}, vision: {}, quoteQueue: [] };
     let pendingVideo = null;
-    let emergencyVideoId = null; 
+    let emergencyVideoId = null;
     let isAmbientPlaying = false;
 
-    const todayStr = new Date().toISOString().split('T')[0];
-    document.getElementById('dashboard-date').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-    // --- THE PERSONALIZED NASHIK PROTOCOL ---
-    const customCurriculum = [
-      "The world thinks you need a massive studio. You just need discipline and Wi-Fi. But you cannot edit a cinematic sequence if your dopamine is fried by short-form scrolling. Create, do not consume.",
-      "Assisting with digital price lists and video ads at the family hardware business isn't a chore—it is your training ground. Learn B2B sales in the physical world, and your digital agency will be unstoppable.",
-      "A Porsche and a daypack for travel mean nothing if you miss Fajr. Your 5 daily prayers are the ultimate shutdown sequence for your soul. Anchor the spiritual baseline first.",
-      "True brotherhood means elevating each other. Are your conversations about the future, or just noise? Surround yourself with builders. Iron sharpens iron.",
-      "You fought a bank over a frozen account and stood up to a scammer. That is leverage. Use that same aggressive defense to protect your time from digital brainrot.",
-      "Preparing for a partnership is not just about financial stability through freelance clients. It is about physical calibration. The 30 minutes of exercise is how you build a frame capable of carrying a family.",
-      "The Vision Board has four pillars. Neglect one, and the structure collapses. You cannot trade Quran for code, or fitness for freelance gigs. Complete the checklist.",
-      "Fast-food cravings are a glitch in the software. When the urge hits, do not negotiate. Hit the emergency button. Watch the vault video. Break the loop.",
-      "Your brand, HN Visuals, requires focus that a mobile device inherently fights against. Every notification is a tax on your creative bandwidth. Turn them off.",
-      "You are building a compounding machine. Today's work does not pay off tomorrow. It pays off in two years. Patience with results, impatience with actions."
-    ];
-
-    function runSplashAndFirewall() {
-      document.getElementById('splash-streak').innerText = `DAY ${userData.streak || 0}`;
-      setTimeout(() => {
-        document.getElementById('splash-screen').style.opacity = '0';
-        setTimeout(() => {
-          document.getElementById('splash-screen').hidden = true;
-          
-          const displayIndex = (userData.bookIndex || 0) % customCurriculum.length;
-          document.getElementById('firewall-quote').innerText = customCurriculum[displayIndex];
-          document.getElementById('unlock-firewall').hidden = false;
-        }, 500);
-      }, 2000);
-    }
-
-    const toast = document.getElementById('status-toast');
-    function showToast(text) {
-      toast.innerText = text;
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 3500);
-    }
-
-    document.getElementById('audio-toggle-btn').addEventListener('click', () => {
-      const audio = document.getElementById('ambient-audio');
-      const btn = document.getElementById('audio-toggle-btn');
-      if (isAmbientPlaying) {
-        audio.pause();
-        btn.innerText = "🔇 Ambient: OFF";
-        btn.classList.remove('playing');
-        isAmbientPlaying = false;
-      } else {
-        audio.volume = 0.5;
-        audio.play().then(() => {
-          btn.innerText = "🔊 Ambient: ON";
-          btn.classList.add('playing');
-          isAmbientPlaying = true;
-        }).catch(err => showToast("Audio locked. Tap screen first."));
-      }
-    });
-
-    document.getElementById('btn-unlock-app').addEventListener('click', () => {
+    // FIX: date is now computed on demand, not frozen at script load.
+    function getCurrentDateStr() {
+      return new Date().toISOString()document.getElementById('btn-unlock-app').addEventListener('click', () => {
       const input = document.getElementById('firewall-input').value.trim();
-      
+
       if(input.length < 15) {
         showToast("Too short. Actually process what you just read.");
         return;
       }
-      
+
       document.getElementById('unlock-firewall').hidden = true;
-      userData.bookIndex = (userData.bookIndex || 0) + 1;
-      saveToCloud();
       updateUI();
     });
 
@@ -372,8 +326,7 @@
       if(!googleAccessToken) {
         try {
           const provider = new GoogleAuthProvider();
-          // CHANGED TO VISIBLE DRIVE SCOPE
-          provider.addScope('https://www.googleapis.com/auth/drive.file'); 
+          provider.addScope('https://www.googleapis.com/auth/drive.file');
           const result = await signInWithPopup(auth, provider);
           googleAccessToken = GoogleAuthProvider.credentialFromResult(result).accessToken;
           return true;
@@ -385,21 +338,51 @@
     document.getElementById('btn-login').addEventListener('click', async () => {
       if(await ensureDriveToken()) {
         currentUser = auth.currentUser;
+        if (!isAllowedUser(currentUser)) {
+          showToast("Wrong account. This vault only opens for one.");
+          await auth.signOut();
+          googleAccessToken = null;
+          currentUser = null;
+          return;
+        }
         document.getElementById('lock-screen').hidden = true;
         await loadData();
       } else { showToast("Uplink Failed."); }
     });
 
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
+      if (user && isAllowedUser(user)) {
         currentUser = user;
         document.getElementById('lock-screen').hidden = true;
         await loadData();
       } else {
+        if (user && !isAllowedUser(user)) {
+          showToast("Wrong account. This vault only opens for one.");
+          await auth.signOut();
+        }
         document.getElementById('splash-screen').hidden = true;
         document.getElementById('lock-screen').hidden = false;
       }
     });
+
+    async function getOrCreateAppFolder() {
+      try {
+        const q = `name='${APP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`, {
+          headers: { 'Authorization': 'Bearer ' + googleAccessToken }
+        });
+        const data = await res.json();
+        if (data.files && data.files.length) return data.files[0].id;
+
+        const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: APP_FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' })
+        });
+        const created = await createRes.json();
+        return created.id;
+      } catch (e) { return null; }
+    }
 
     // --- RECOVERY & DATA INIT ---
     async function loadData() {
@@ -409,18 +392,37 @@
           userData = docSnap.data();
           if(!userData.history) userData.history = {};
           if(!userData.vision) userData.vision = {};
+          if(!userData.quoteQueue) userData.quoteQueue = [];
         }
-        
-        if(!userData.history[todayStr]) {
-          userData.history[todayStr] = { namaz: [false,false,false,false,false], quran: false, salam: false, media: "pending", sleep: "", exercise: 0, creativity: "", vidId: null, journalText: "" };
-        } 
-        
-        const allDays = Object.values(userData.history);
-        const firstVid = allDays.find(d => d.vidId);
-        if(firstVid) emergencyVideoId = firstVid.vidId;
+
+        if (await ensureDriveToken()) {
+          appFolderId = await getOrCreateAppFolder();
+        }
+
+        currentDateStr = getCurrentDateStr();
+        if(!userData.history[currentDateStr]) {
+          userData.history[currentDateStr] = blankDayEntry();
+        }
+
+        // FIX: deterministic chronological order instead of relying on
+        // object key iteration order (which isn't guaranteed for dates).
+        const sortedDates = Object.keys(userData.history).sort();
+        const firstDateWithVideo = sortedDates.find(d => userData.history[d].vidId);
+        if(firstDateWithVideo) emergencyVideoId = userData.history[firstDateWithVideo].vidId;
 
         loadVisionBoard();
         runSplashAndFirewall();
+
+        // FIX: this is what actually catches the day changing while the app
+        // is open or suspended in the background (PWA resume, phone left on overnight, etc).
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible' && currentUser) {
+            if (ensureTodayEntry()) updateUI();
+          }
+        });
+        setInterval(() => {
+          if (currentUser && ensureTodayEntry()) updateUI();
+        }, 5 * 60 * 1000);
       } catch (e) { showToast("Offline Mode."); }
     }
 
@@ -450,48 +452,48 @@
 
     document.querySelectorAll('#namaz-group .checkbox-btn').forEach((btn, index) => {
       btn.addEventListener('click', () => {
-        let state = userData.history[todayStr].namaz;
-        state[index] = !state[index]; 
-        userData.history[todayStr].namaz = state;
-        if(state[index]) applyCompoundXP(20); else applyCompoundXP(-20); 
+        let state = userData.history[currentDateStr].namaz;
+        state[index] = !state[index];
+        userData.history[currentDateStr].namaz = state;
+        if(state[index]) applyCompoundXP(20); else applyCompoundXP(-20);
         updateUI();
       });
     });
 
     document.getElementById('salam-btn').addEventListener('click', () => {
-      userData.history[todayStr].salam = !userData.history[todayStr].salam;
-      if(userData.history[todayStr].salam) applyCompoundXP(30); else applyCompoundXP(-30);
+      userData.history[currentDateStr].salam = !userData.history[currentDateStr].salam;
+      if(userData.history[currentDateStr].salam) applyCompoundXP(30); else applyCompoundXP(-30);
       updateUI();
     });
-    
+
     document.getElementById('quran-btn').addEventListener('click', () => {
-      userData.history[todayStr].quran = !userData.history[todayStr].quran;
-      if(userData.history[todayStr].quran) applyCompoundXP(40); else applyCompoundXP(-40);
+      userData.history[currentDateStr].quran = !userData.history[currentDateStr].quran;
+      if(userData.history[currentDateStr].quran) applyCompoundXP(40); else applyCompoundXP(-40);
       updateUI();
     });
 
     document.getElementById('media-select').addEventListener('change', (e) => {
-      userData.history[todayStr].media = e.target.value;
+      userData.history[currentDateStr].media = e.target.value;
       if(e.target.value === 'perfect') applyCompoundXP(50);
       saveToCloud();
     });
 
     document.getElementById('btn-save-sleep').addEventListener('click', () => {
-      userData.history[todayStr].sleep = document.getElementById('sleep-time').value;
+      userData.history[currentDateStr].sleep = document.getElementById('sleep-time').value;
       applyCompoundXP(40);
       showToast("Shutdown logged.");
     });
 
     document.getElementById('exercise-slider').addEventListener('change', (e) => {
-      userData.history[todayStr].exercise = e.target.value;
-      applyCompoundXP(Math.round(e.target.value / 2)); 
+      userData.history[currentDateStr].exercise = e.target.value;
+      applyCompoundXP(Math.round(e.target.value / 2));
       saveToCloud();
     });
 
     document.getElementById('btn-save-creativity').addEventListener('click', () => {
       const txt = document.getElementById('creativity-input').value;
       if(txt.length > 3) {
-        userData.history[todayStr].creativity = txt;
+        userData.history[currentDateStr].creativity = txt;
         applyCompoundXP(50);
         showToast("Build committed.");
       }
@@ -499,7 +501,7 @@
 
     // --- VISIBLE VISION BOARD PIPELINE ---
     const pillars = ['spiritual', 'fitness', 'partnership', 'craft'];
-    
+
     function loadVisionBoard() {
       pillars.forEach(async (pillar) => {
         const pData = userData.vision[pillar];
@@ -527,13 +529,14 @@
       document.getElementById(`vision-file-${pillar}`).addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if(!file) return;
-        
+
         showToast("Encrypting image to Visible Vault...");
         if(!(await ensureDriveToken())) { showToast("Drive Auth failed."); return; }
 
         const form = new FormData();
-        // PARENTS REMOVED: Now saves to main Drive
-        form.append('metadata', new Blob([JSON.stringify({ name: `vision_${pillar}.jpg` })], { type: 'application/json' }));
+        const visionMeta = { name: `vision_${pillar}.jpg` };
+        if (appFolderId) visionMeta.parents = [appFolderId];
+        form.append('metadata', new Blob([JSON.stringify(visionMeta)], { type: 'application/json' }));
         form.append('file', file);
 
         try {
@@ -565,15 +568,16 @@
 
     document.getElementById('btn-save-journal').addEventListener('click', async () => {
       const textVal = document.getElementById('journal-input').value.trim();
-      userData.history[todayStr].journalText = textVal;
+      userData.history[currentDateStr].journalText = textVal;
       showToast("Encrypting entry into Vault...");
 
       if (pendingVideo) {
         if (!(await ensureDriveToken())) { showToast("Drive auth failed."); return; }
 
         const form = new FormData();
-        // PARENTS REMOVED: Now saves to main Drive
-        form.append('metadata', new Blob([JSON.stringify({ name: `LifeReset_Log_${todayStr}.mp4` })], { type: 'application/json' }));
+        const videoMeta = { name: `LifeReset_Log_${currentDateStr}.mp4` };
+        if (appFolderId) videoMeta.parents = [appFolderId];
+        form.append('metadata', new Blob([JSON.stringify(videoMeta)], { type: 'application/json' }));
         form.append('file', pendingVideo);
 
         try {
@@ -582,9 +586,9 @@
           });
           const data = await res.json();
           if(data.id) {
-            userData.history[todayStr].vidId = data.id;
-            if(!emergencyVideoId) emergencyVideoId = data.id; 
-            applyCompoundXP(100); 
+            userData.history[currentDateStr].vidId = data.id;
+            if(!emergencyVideoId) emergencyVideoId = data.id;
+            applyCompoundXP(100);
             showToast(`Evidence locked into Vault.`);
           }
         } catch (err) { showToast("Media upload error."); }
@@ -592,7 +596,7 @@
         saveToCloud();
         showToast("Text journal saved.");
       }
-      
+
       pendingVideo = null;
       document.getElementById('vid-status').hidden = true;
       buildGallery();
@@ -605,9 +609,9 @@
 
     // --- UI RENDERER & ARCHIVE MODAL LOGIC ---
     function updateUI() {
-      const todayData = userData.history[todayStr] || { namaz: [] };
+      const todayData = userData.history[currentDateStr] || blankDayEntry();
       const multiplier = Math.pow(1.01, userData.streak || 0).toFixed(2);
-      
+
       document.getElementById('compound-multiplier').innerText = `${multiplier}x Compound Leverage`;
       document.getElementById('xp-val').innerText = `${userData.xp || 0} XP`;
 
@@ -624,44 +628,60 @@
       if(todayData.salam) salamBtn.classList.add('active'); else salamBtn.classList.remove('active');
 
       if(todayData.media) document.getElementById('media-select').value = todayData.media;
-      if(todayData.sleep) document.getElementById('sleep-time').value = todayData.sleep;
-      if(todayData.exercise) document.getElementById('exercise-slider').value = todayData.exercise;
-      if(todayData.creativity) document.getElementById('creativity-input').value = todayData.creativity;
-      if(todayData.journalText) document.getElementById('journal-input').value = todayData.journalText;
-      
+      document.getElementById('sleep-time').value = todayData.sleep || '';
+      document.getElementById('exercise-slider').value = todayData.exercise || 0;
+      document.getElementById('creativity-input').value = todayData.creativity || '';
+      document.getElementById('journal-input').value = todayData.journalText || '';
+
       buildGallery();
     }
-       function buildGallery() {
+
+    // FIX: built with real DOM nodes and addEventListener instead of an
+    // inline onclick string — that's what was silently breaking on any
+    // journal entry with a newline, quote, or line break.
+    function buildGallery() {
       const gallery = document.getElementById('media-gallery');
       if(!gallery) return;
       gallery.innerHTML = '';
-      
-      Object.keys(userData.history).reverse().forEach(dateKey => {
+
+      Object.keys(userData.history).sort().reverse().forEach(dateKey => {
         const entry = userData.history[dateKey];
-        if(entry.vidId || entry.journalText) {
-          
-          // BULLETPROOF ENCODING: Prevents line breaks and quotes from crashing the button
-          const safeText = encodeURIComponent(entry.journalText || "");
-          const vidParam = entry.vidId ? `'${entry.vidId}'` : `null`;
-          
-          gallery.innerHTML += `
-            <div class="media-thumbnail" onclick="window.openArchiveModal('${dateKey}', '${safeText}', ${vidParam})">
-              ${entry.vidId ? '<span style="font-size:30px; margin-bottom: 8px;">📼</span>' : '<span style="font-size:30px; margin-bottom: 8px;">📝</span>'}
-              <span style="font-size:12px; font-weight:700;">${dateKey.replace('Legacy-', '')}</span>
-              ${entry.journalText ? `<div style="font-size:8px; opacity:0.6; padding:0 4px; margin-top:4px;">${entry.journalText.substring(0, 15)}...</div>` : ''}
-            </div>
-          `;
+        if(!entry.vidId && !entry.journalText) return;
+
+        const card = document.createElement('div');
+        card.className = 'media-thumbnail';
+
+        const icon = document.createElement('span');
+        icon.style.fontSize = '30px';
+        icon.style.marginBottom = '8px';
+        icon.textContent = entry.vidId ? '📼' : '📝';
+        card.appendChild(icon);
+
+        const label = document.createElement('span');
+        label.style.fontSize = '12px';
+        label.style.fontWeight = '700';
+        label.textContent = dateKey.replace('Legacy-', '');
+        card.appendChild(label);
+
+        if (entry.journalText) {
+          const preview = document.createElement('div');
+          preview.style.fontSize = '8px';
+          preview.style.opacity = '0.6';
+          preview.style.padding = '0 4px';
+          preview.style.marginTop = '4px';
+          preview.textContent = entry.journalText.substring(0, 15) + '...';
+          card.appendChild(preview);
         }
+
+        card.addEventListener('click', () => openArchiveModal(dateKey, entry.journalText || '', entry.vidId || null));
+        gallery.appendChild(card);
       });
     }
 
-    window.openArchiveModal = function(date, encodedText, vidId) {
+    function openArchiveModal(date, text, vidId) {
       document.getElementById('modal-date').innerText = date.replace('Legacy-', '');
-      
-      // DECODE THE TEXT: Translates it back into readable paragraphs
-      const decodedText = decodeURIComponent(encodedText);
-      document.getElementById('modal-text').innerText = decodedText || "No text log for this day.";
-      
+      document.getElementById('modal-text').innerText = text || "No text log for this day.";
+
       const playBtn = document.getElementById('btn-play-modal-vid');
       if(vidId) {
         playBtn.hidden = false;
@@ -669,11 +689,11 @@
       } else {
         playBtn.hidden = true;
       }
-      
+
       document.getElementById('archive-modal').hidden = false;
-    };
-    
-      document.getElementById('btn-close-modal').addEventListener('click', () => {
+    }
+
+    document.getElementById('btn-close-modal').addEventListener('click', () => {
       document.getElementById('archive-modal').hidden = true;
     });
 
@@ -683,12 +703,12 @@
       document.getElementById('video-overlay').hidden = false;
       const player = document.getElementById('player');
       showToast("Decrypting secure video stream...");
-      
+
       try {
         const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { 'Authorization': 'Bearer ' + googleAccessToken } });
         const arrayBuffer = await res.arrayBuffer();
         const videoBlob = new Blob([arrayBuffer], { type: 'video/mp4' });
-        
+
         if(player.src) URL.revokeObjectURL(player.src);
         player.src = URL.createObjectURL(videoBlob);
         player.muted = false;
